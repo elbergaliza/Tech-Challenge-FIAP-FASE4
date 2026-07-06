@@ -234,15 +234,3 @@ env/
 # Sistema operacional
 .DS_Store
 Thumbs.db
-
-# Dados brutos, processados, modelos e outputs em qualquer subpasta
-**/data/raw/*
-**/data/processed/*
-**/models/*
-**/outputs/*
-
-# Mantém as pastas no Git
-!**/data/raw/.gitkeep
-!**/data/processed/.gitkeep
-!**/models/.gitkeep
-!**/outputs/.gitkeep

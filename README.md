@@ -20,47 +20,25 @@ Detectar possíveis anomalias clínicas em pacientes de UTI a partir de dados es
 
 Dataset: **eICU Collaborative Research Database Demo v2.0.1**
 
-Arquivos utilizados nesta etapa:
+# Dataset
 
-```text
-vitalPeriodic.csv.gz
-lab.csv.gz
-medication.csv.gz
-```
+Esta pasta deve conter os arquivos do eICU-CRD Demo.
 
-Esses arquivos devem ser colocados na pasta:
+Baixe o dataset oficial em:
 
-```text
-data/raw/
-```
+https://physionet.org/content/eicu-crd-demo/2.0.1/
+
+Para executar o módulo de anomalias clínicas, coloque nesta pasta pelo menos:
+
+- vitalPeriodic.csv.gz
+- lab.csv.gz
+- medication.csv.gz
 
 Estrutura esperada:
 
-```text
-eicu-anomaly-detection/
-│
-├── data/
-│   ├── raw/
-│   │   ├── vitalPeriodic.csv.gz
-│   │   ├── lab.csv.gz
-│   │   └── medication.csv.gz
-│   │
-│   └── processed/
-│
-├── models/
-├── outputs/
-├── src/
-│   ├── config.py
-│   ├── data_loader.py
-│   ├── feature_builder.py
-│   ├── anomaly_detector.py
-│   ├── alert_generator.py
-│   ├── train.py
-│   └── test_output.py
-│
-├── requirements.txt
-└── README.md
-```
+data/raw/vitalPeriodic.csv.gz  
+data/raw/lab.csv.gz  
+data/raw/medication.csv.gz
 
 ## Como instalar as dependências
 

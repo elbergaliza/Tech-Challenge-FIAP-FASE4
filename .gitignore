@@ -234,3 +234,16 @@ env/
 # Sistema operacional
 .DS_Store
 Thumbs.db
+
+# Dados e artefatos gerados
+**/data/raw/*
+**/data/processed/*
+**/models/*
+**/outputs/*
+
+# Mantém estrutura de pastas
+!**/data/raw/.gitkeep
+!**/data/raw/README.md
+!**/data/processed/.gitkeep
+!**/models/.gitkeep
+!**/outputs/.gitkeep

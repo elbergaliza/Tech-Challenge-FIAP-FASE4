@@ -1,0 +1,180 @@
+########ETAPAS
+O trabalho foi divido em 5 etapas, conforme especificação em C:\Users\egali\OneDrive\###FIAP-IA para DEVS\Fase 4\Tech Challenge-Fase4\"8IADT - Fase 4 - Tech challenge.pdf"
+1-Analise de video
+2-Analise de audio
+3-Detecção de anomalias
+4-Integração das etapas 1, 2 e 3 com a nuvem: Azure Cognitive Services
+5-Elaborar os entregaveis conforme especificação.
+
+A ideia é para um sistema que processa múltiplos tipos de dados ao mesmo tempo — vídeo, áudio e séries temporais de sinais vitais. 
+E depois processar cada tipo de dado com a ferramenta certa, e depois juntar tudo em um sistema de alerta único.
+
+A minha parte é a de áudio: "2-Analise de audio"
+As bases a ser utilizada é o COSWARA: 
+	https://www.kaggle.com/datasets/janashreeananthan/coswara
+
+########DESCRIÇÃO GERAL
+
+A ideia geral seria um sistema multimodal de monitoramento preventivo de pacientes, usando:
+
+Vídeo/fisioterapia: Multi-Gait-Posture;
+Áudio/voz/respiração: COSWARA
+Anomalias clínicas em UTI: eICU-CRD Demo.
+
+Cada parte pode ser feita separadamente, sem depender das outras no começo.
+
+
+
+########1-Analise de video
+1. Módulo de vídeo — fisioterapia/postura/marcha
+
+Dataset: Multi-Gait-Posture
+
+Essa parte ficaria responsável por analisar movimentos corporais em contexto de fisioterapia ou reabilitação.
+
+O que essa parte faria:
+
+processar frames de vídeo/depth;
+analisar postura, marcha e movimentação;
+calcular ângulos, velocidade, simetria e estabilidade;
+detectar desvios como:
+inclinação excessiva do tronco;
+assimetria de passada;
+perda de estabilidade;
+velocidade fora do padrão;
+movimento incompatível com o esperado;
+gerar um relatório com os desvios encontrados.
+
+Saída esperada desse módulo:
+
+{
+  "patient_id": "video_001",
+  "modulo": "video_fisioterapia",
+  "tipo_anomalia": "movimento",
+  "score_risco": 0.72,
+  "nivel_risco": "moderado",
+  "descricao": "Assimetria de marcha e inclinação excessiva do tronco.",
+  "recomendacao": "Revisar exercício de fisioterapia."
+}
+
+########2-Analise de audio
+2. Módulo de áudio e texto — voz, tosse, respiração e transcrição
+
+Dataset: COSWARA
+
+Essa parte ficaria responsável por analisar áudio de fala, tosse ou respiração, além de transformar o áudio em texto.
+
+O que essa parte faria:
+processar gravações de voz, tosse ou respiração;
+extrair características do áudio, como MFCC, espectrograma, intensidade e pausas;
+identificar sinais como cansaço vocal, dificuldade respiratória ou tosse alterada;
+transcrever o áudio com Speech to Text;
+analisar o texto transcrito buscando termos críticos, como:
+falta de ar;
+dor no peito;
+cansaço;
+tontura;
+piora;
+dificuldade para respirar;
+gerar um alerta com base no áudio e no texto.
+
+Saída esperada desse módulo:
+
+{
+  "patient_id": "audio_001",
+  "modulo": "audio_texto",
+  "tipo_anomalia": "alteracao_respiratoria_vocal",
+  "score_risco": 0.81,
+  "nivel_risco": "alto",
+  "descricao": "Paciente apresenta padrão vocal cansado e termos associados a falta de ar.",
+  "recomendacao": "Encaminhar para avaliação respiratória."
+}
+
+########3-Detecção de anomalias
+3. Módulo de detecção de anomalias clínicas — UTI
+
+Dataset: eICU-CRD Demo
+
+Essa parte ficaria responsável por analisar dados clínicos de UTI, como sinais vitais, exames, medicações, diagnósticos e tratamentos.
+
+O que essa parte faria:
+
+carregar as tabelas do eICU;
+juntar os dados pelo identificador da internação do paciente;
+analisar sinais vitais como:
+frequência cardíaca;
+pressão arterial;
+frequência respiratória;
+oxigenação;
+temperatura;
+analisar também exames, medicações e tratamentos;
+detectar anomalias, por exemplo:
+frequência cardíaca muito alta;
+pressão arterial muito baixa;
+queda de oxigenação;
+febre associada a outros sinais de risco;
+mudança inesperada em medicação ou tratamento;
+aplicar regras clínicas simples e/ou modelo de anomalia, como Isolation Forest;
+gerar alerta automático para a equipe médica.
+
+Saída esperada desse módulo:
+
+{
+  "patient_id": "clinical_001",
+  "modulo": "anomalias_clinicas_uti",
+  "tipo_anomalia": "sinais_vitais",
+  "score_risco": 0.87,
+  "nivel_risco": "alto",
+  "descricao": "Paciente apresentou queda de pressão associada a aumento da frequência cardíaca.",
+  "recomendacao": "Reavaliar paciente e acionar equipe médica."
+}
+
+########4-Integração das etapas 1, 2 e 3 com a nuvem: Azure Cognitive Services
+Depois que cada módulo estiver funcionando separadamente, precisamos padronizar a saída de todos eles.
+
+Ou seja, todos devem gerar um alerta parecido, com campos como:
+
+{
+  "patient_id": "identificador_do_paciente_ou_amostra",
+  "modulo": "video/audio/clinico",
+  "tipo_anomalia": "tipo de problema detectado",
+  "score_risco": 0.0,
+  "nivel_risco": "baixo/moderado/alto",
+  "descricao": "explicação do que foi encontrado",
+  "recomendacao": "ação sugerida para a equipe médica"
+}
+
+A integração final faria a fusão dos alertas:
+
+score de vídeo + score de áudio/texto + score clínico
+→ classificação final de risco
+→ alerta para equipe médica
+→ relatório automático
+
+Exemplo de resultado final:
+
+{
+  "patient_id": "paciente_001",
+  "risco_final": "alto",
+  "score_final": 0.85,
+  "alertas_detectados": [
+    "alteração nos sinais vitais",
+    "termos críticos na fala",
+    "desvio de movimentação"
+  ],
+  "recomendacao_final": "Acionar equipe médica para reavaliação do paciente."
+}
+
+########FORMA DE TRABALHO
+Então, no começo, cada pessoa pode trabalhar separadamente no seu módulo. 
+Não precisamos esperar todo mundo terminar para começar.
+
+
+########PADRAO MINIMO DE SAIDA
+score de risco de 0 a 1;
+nível de risco: baixo, moderado ou alto;
+descrição da anomalia;
+recomendação;
+formato JSON ou CSV.
+
+Depois juntamos tudo em uma etapa final de fusão e relatório.

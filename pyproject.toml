@@ -1,0 +1,7 @@
+[project]
+name = "tech-challenge-fiap-fase4"
+version = "0.1.0"
+description = "Tech Challenge Fase 4 - Sistema de **monitoramento clínico multimodal** que ingere vídeo, áudio e texto, processa cada modalidade com as técnicas ensinadas no curso, funde os resultados, aplica **detecção de anomalias** e dispara **alertas** para a equipe médica."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []

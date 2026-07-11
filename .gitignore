@@ -247,3 +247,19 @@ Thumbs.db
 !**/data/processed/.gitkeep
 !**/models/.gitkeep
 !**/outputs/.gitkeep
+
+
+#######SPECKIT########
+# Cursor IDE — configurações locais, skills e possíveis credenciais do agente
+.cursor/
+# Spec Kit — templates, scripts e estado local do fluxo spec-driven (não versionar)
+.specify/
+# Minhas especificações de entrada
+docs/spec/
+# Meus Prompts — configurações e templates de prompts para a IA
+docs/PROMPTS/
+
+########DATASET########
+# Dataset — arquivos de áudio, vídeo e dados brutos do Tech Challenge (volume alto, uso local)
+dataset/
+

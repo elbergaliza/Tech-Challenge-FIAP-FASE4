@@ -1,5 +1,5 @@
 ########ETAPAS
-O trabalho foi divido em 5 etapas, conforme especificação em C:\Users\egali\OneDrive\###FIAP-IA para DEVS\Fase 4\Tech Challenge-Fase4\"8IADT - Fase 4 - Tech challenge.pdf"
+O trabalho foi divido em 5 etapas, conforme especificação no enunciado oficial: "8IADT - Fase 4 - Tech challenge.pdf" (FIAP — Fase 4, Tech Challenge)
 1-Analise de video
 2-Analise de audio
 3-Detecção de anomalias

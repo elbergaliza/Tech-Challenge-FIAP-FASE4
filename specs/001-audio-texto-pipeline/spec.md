@@ -85,13 +85,13 @@ A partir de um texto já transcrito (desta gravação ou de uma fonte de texto j
 
 ### Functional Requirements
 
-- **FR-001**: O sistema MUST aceitar como entrada uma única gravação de voz de paciente (podendo conter fala, tosse e/ou respiração), associada a um identificador de paciente/amostra.
+- **FR-001**: O sistema MUST aceitar como entrada uma única gravação de voz de paciente (podendo conter fala, tosse e/ou respiração), associada a um identificador de paciente/amostra. Os formatos suportados são WAV e MP3; a gravação MUST ter duração máxima de 10 minutos e tamanho máximo de 50 MB.
 - **FR-002**: O sistema MUST produzir uma transcrição em texto do conteúdo falado presente na gravação, quando houver fala compreensível.
-- **FR-003**: O sistema MUST associar à transcrição um indicador de confiança/qualidade (ex.: alta/baixa confiança), permitindo que etapas posteriores considerem o grau de certeza do texto obtido.
+- **FR-003**: O sistema MUST associar à transcrição um indicador de confiança numérico entre 0.0 e 1.0, representando a qualidade/certeza do texto obtido. Este valor MUST ser usado para ponderar o score textual antes da combinação: `score_textual_efetivo = score_textual × confiança_transcrição`, garantindo que transcrições de baixa confiança não inflem artificialmente o risco final.
 - **FR-004**: O sistema MUST extrair características acústicas do sinal de áudio (relacionadas a intensidade, pausas e padrão sonoro) e usá-las para identificar sinais de cansaço vocal, tosse alterada e/ou dificuldade respiratória.
 - **FR-005**: O sistema MUST analisar o texto transcrito para identificar a presença de termos críticos pré-definidos associados a risco clínico (ex.: falta de ar, dor no peito, cansaço, tontura, piora, dificuldade para respirar).
 - **FR-006**: O sistema MUST classificar o tom geral do texto transcrito (ex.: negativo/neutro/positivo) como sinal adicional de risco, considerando tom negativo como fator que aumenta a probabilidade de risco.
-- **FR-007**: O sistema MUST combinar os sinais acústicos (FR-004) e os achados textuais (FR-005, FR-006) em um único score de risco numérico entre 0.0 e 1.0.
+- **FR-007**: O sistema MUST combinar os sinais acústicos (FR-004) e os achados textuais (FR-005, FR-006) em um único score de risco numérico entre 0.0 e 1.0, adotando a regra de máximo: `score_risco = max(score_acústico, score_textual_efetivo)`, onde `score_textual_efetivo = score_textual × confiança_transcrição` (conforme FR-003). Nenhuma fonte pode suprimir o risco identificado pela outra; a ausência de sinal de uma fonte não reduz o score produzido pela outra.
 - **FR-008**: O sistema MUST classificar o score de risco combinado em um nível de risco categórico: "baixo" (score < 0.4), "moderado" (0.4 ≤ score < 0.7) ou "alto" (score ≥ 0.7).
 - **FR-009**: O sistema MUST gerar uma descrição legível por humanos, resumindo os principais achados acústicos e textuais que fundamentaram o score.
 - **FR-010**: O sistema MUST gerar uma recomendação de ação específica e acionável para a equipe médica, coerente com o nível de risco identificado.
@@ -99,7 +99,7 @@ A partir de um texto já transcrito (desta gravação ou de uma fonte de texto j
 - **FR-012**: O sistema MUST processar corretamente gravações sem fala compreensível (apenas tosse/respiração/silêncio), baseando o alerta somente nos sinais acústicos disponíveis, sem falhar por ausência de transcrição.
 - **FR-013**: O sistema MUST processar corretamente casos em que os sinais acústicos não indiquem nenhuma anomalia, baseando o alerta somente nos achados textuais disponíveis.
 - **FR-014**: O sistema MUST rejeitar entradas sem identificador de paciente/amostra, sem gerar alerta associado a uma entrada não identificável.
-- **FR-015**: O sistema MUST rejeitar de forma explícita gravações corrompidas, vazias ou em formato não reconhecido, sem produzir um alerta com dados inválidos.
+- **FR-015**: O sistema MUST rejeitar de forma explícita gravações corrompidas, vazias, em formato não reconhecido (qualquer formato diferente de WAV ou MP3), com duração superior a 10 minutos ou com tamanho superior a 50 MB, sem produzir um alerta com dados inválidos.
 - **FR-016**: O sistema MUST tratar cada gravação de forma independente de outras modalidades do sistema (vídeo, dados clínicos), produzindo sua saída sem depender da disponibilidade dessas outras modalidades.
 - **FR-017**: O sistema MUST preservar o texto transcrito original como parte dos dados rastreáveis do processamento, para fins de auditoria e revisão humana posterior.
 
@@ -113,6 +113,11 @@ A partir de um texto já transcrito (desta gravação ou de uma fonte de texto j
 
 ## Success Criteria *(mandatory)*
 
+### Non-Functional Requirements
+
+- **NFR-001**: O pipeline MUST concluir o processamento completo de uma gravação (do recebimento do arquivo à entrega do alerta) em no máximo **60 segundos** por padrão. Este limite MUST ser parametrizável via configuração, sem alteração de código, para acomodar diferentes ambientes de execução (ex.: modelos de transcrição mais pesados em GPU vs. CPU).
+- **NFR-002**: O módulo MUST emitir logs estruturados por etapa do pipeline, registrando: início e fim de cada etapa, duração em milissegundos, `patient_id` (anonimizado ou referência, nunca conteúdo clínico) e status (sucesso/falha). O conteúdo do áudio, da transcrição e dos termos críticos encontrados MUST NOT ser incluído nos logs. As métricas mínimas obrigatórias são: latência total por invocação, taxa de rejeições de entrada e score de risco gerado.
+
 ### Measurable Outcomes
 
 - **SC-001**: 100% das gravações processadas com sucesso resultam em exatamente um alerta com todos os sete campos obrigatórios preenchidos (nenhum campo nulo ou ausente).
@@ -121,6 +126,17 @@ A partir de um texto já transcrito (desta gravação ou de uma fonte de texto j
 - **SC-004**: 100% das gravações sem fala compreensível (apenas tosse/respiração/silêncio) ainda produzem um alerta válido, sem erro de processamento por ausência de transcrição.
 - **SC-005**: 100% das gravações rejeitadas por identificador ausente, arquivo corrompido ou formato não suportado são identificadas explicitamente como entrada inválida, sem gerar um alerta com dados incompletos ou inconsistentes.
 - **SC-006**: Em revisão por amostragem de um conjunto de gravações sem queixas relevantes e sem sinais acústicos de risco, ao menos 90% são classificadas como nível de risco "baixo" com `tipo_anomalia` "nenhuma" (baixa taxa de falso alarme).
+- **SC-007**: 100% das gravações processadas com sucesso têm seu alerta gerado dentro do limite de latência configurado (padrão: 60 segundos); ultrapassar esse limite MUST ser registrado como falha de performance observável.
+
+## Clarifications
+
+### Session 2026-07-12
+
+- Q: Como os sinais acústicos e os achados textuais devem ser combinados para produzir o score de risco único (FR-007)? → A: Regra de máximo — `score_risco = max(score_acústico, score_textual)`
+- Q: Quais formatos de arquivo de áudio e restrições de entrada devem ser suportados (FR-001 / FR-015)? → A: WAV e MP3; duração máxima 10 min; tamanho máximo 50 MB
+- Q: Como o indicador de confiança da transcrição deve ser representado e como afeta o score de risco (FR-003 / FR-007)? → A: Numérico contínuo 0.0–1.0; `score_textual_efetivo = score_textual × confiança` antes do `max()`
+- Q: Qual é a latência máxima aceitável para o processamento completo de uma gravação? → A: 60 segundos por padrão, valor parametrizável
+- Q: Quais sinais de observabilidade o módulo deve emitir durante o processamento? → A: Log estruturado por etapa (duração + patient_id + status); métricas de latência, rejeição e score — sem logar conteúdo de áudio ou transcrição
 
 ## Assumptions
 

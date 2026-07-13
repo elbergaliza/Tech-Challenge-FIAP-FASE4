@@ -16,12 +16,14 @@ Representa a entrada validada do modulo.
 | `source` | enum | no | `pt_br_demo`, `coswara`, `manual`, `unknown`. |
 | `max_duration_seconds` | integer | no | Default `600`; deve ser `> 0`. |
 | `max_size_mb` | integer | no | Default `50`; deve ser `> 0`. |
+| `timeout_seconds` | integer | no | Default `60`; deve ser `> 0`. Parametriza o limite de latencia de NFR-001 sem alteracao de codigo. |
 
 ### Rules
 
 - `patient_id` ausente ou vazio invalida a entrada.
 - Arquivos fora de WAV/MP3, vazios, corrompidos, maiores que 50 MB ou com duracao maior que 10 minutos devem ser rejeitados explicitamente.
 - `patient_id` pode aparecer em saidas e logs apenas como identificador anonimo/referencia; audio, transcricao e termos clinicos nao entram em logs.
+- `timeout_seconds` nao aborta o processamento em andamento (o alerta ainda deve ser gerado quando houver base valida); ele apenas define o limiar acima do qual a duracao total MUST ser registrada como falha de performance observavel, conforme SC-007.
 
 ## Entity: AudioMetadata
 
@@ -49,7 +51,8 @@ Representa o resultado da Camada A de transcricao.
 
 ### Rules
 
-- Confiança retornada em escala diferente deve ser normalizada no adaptador Azure antes de chegar ao dominio.
+- Origem, granularidade e escala de `confidence` estao documentadas em `contracts/transcription.json` (resolve CHK003 de `checklists/score-formula.md`): valor unico por chamada (`NBest[0].Confidence` do resultado detalhado do Azure Speech SDK), ja nativo em `[0.0, 1.0]`.
+- Confiança retornada em escala diferente do esperado deve ser normalizada no adaptador Azure antes de chegar ao dominio.
 - `failed` deve encerrar a etapa de transcricao, mas nao necessariamente o pipeline se houver sinais acusticos suficientes e o erro nao for de entrada invalida.
 - O texto transcrito pode ser persistido em `data/processed/` para auditoria, mas nunca deve ser logado.
 
@@ -105,7 +108,12 @@ Contrato publico final do modulo.
 | `nivel_risco` | enum | yes | `baixo`, `moderado`, `alto`. |
 | `descricao` | string | yes | Legivel e sem segredo; pode citar achados clinicos no arquivo de relatorio, mas nao em logs. |
 | `recomendacao` | string | yes | Acao clinica coerente com o nivel de risco. |
-| `evidencias` | object | no | Scores e sinais resumidos para auditoria; sem audio bruto. |
+| `evidencias` | object | no | Scores e sinais resumidos para auditoria; sem audio bruto. Inclui `duracao_processamento_ms` e `excedeu_limite_latencia` para satisfazer SC-007. |
+
+### Observability fields (NFR-001 / SC-007)
+
+- `evidencias.duracao_processamento_ms`: duracao total do pipeline em milissegundos, do recebimento da entrada ate a geracao do alerta.
+- `evidencias.excedeu_limite_latencia`: booleano, `true` quando `duracao_processamento_ms > timeout_seconds * 1000`. Este campo, junto do log estruturado de NFR-002, e a forma de registrar a falha de performance como observavel sem interromper a entrega do alerta.
 
 ### Risk classification
 

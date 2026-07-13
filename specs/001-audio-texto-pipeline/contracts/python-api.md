@@ -67,6 +67,7 @@ Falhas parciais de transcricao/text analytics nao devem vazar credenciais nem co
 - Pode gravar o alerta final em `data/reports/` quando chamado via CLI ou quando configurado explicitamente.
 - Deve emitir logs estruturados por etapa com duracao, status e `patient_id` anonimizado/referencia.
 - Nao deve logar audio bruto, transcricao ou termos criticos.
+- Deve medir a duracao total do pipeline e comparar com `request.timeout_seconds` (default `60`, NFR-001). Exceder o limite NAO aborta o processamento nem gera excecao; MUST apenas marcar `AudioAlert.evidencias.excedeu_limite_latencia = true` e emitir log de falha de performance observavel (SC-007).
 
 ## Test doubles
 

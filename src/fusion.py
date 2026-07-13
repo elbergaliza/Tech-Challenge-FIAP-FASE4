@@ -29,6 +29,10 @@ class MultimodalFusion:
         return round(sum(scores) / len(scores), 3)
 
     def classify_risk(self, score):
+        # Limiares de agregação da fusão (0.45 / 0.75) são independentes dos
+        # limiares de cada módulo de origem (ex.: audio_texto usa 0.4 / 0.7 —
+        # ver specs/001-audio-texto-pipeline/data-model.md). Não assumir que
+        # os dois conjuntos de limiares precisam coincidir.
         if score >= 0.75:
             return "alto"
         elif score >= 0.45:

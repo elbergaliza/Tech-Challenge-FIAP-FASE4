@@ -11,7 +11,7 @@
 
 - [x] CHK001 - É `score_textual` (o score bruto do texto *antes* da ponderação pela confiança em FR-003) definido com seu método de cálculo e faixa de valores esperada? [Gap, Spec §FR-003] → **RESOLVIDO 2026-07-12**: faixa [0.0,1.0] e invariantes definidas em FR-005; mapeamento detalhado delegado ao `/speckit-plan`
 - [x] CHK002 - É `score_acústico` definido com seu método de cálculo e faixa de entrada esperada (0.0–1.0)? O spec delega a extração de características acústicas ao FR-004, mas não define como essas características se convertem em um único score numérico. [Gap, Spec §FR-004, FR-007] → **RESOLVIDO 2026-07-12**: faixa [0.0,1.0] e invariantes definidas em FR-004; mapeamento detalhado delegado ao `/speckit-plan`
-- [ ] CHK003 - A origem de `confiança_transcrição` está documentada? É o campo de confiança retornado pelo serviço de transcrição, uma média por palavra, um valor único por chamada, ou outro? [Completeness, Spec §FR-003] → **PENDENTE `/speckit-plan`**: origem e granularidade serão definidas no contrato de interface com o serviço de transcrição (`contracts/transcription.json`)
+- [x] CHK003 - A origem de `confiança_transcrição` está documentada? É o campo de confiança retornado pelo serviço de transcrição, uma média por palavra, um valor único por chamada, ou outro? [Completeness, Spec §FR-003] → **RESOLVIDO 2026-07-13** (remediação `/speckit-analyze`): documentado em [`contracts/transcription.json`](../contracts/transcription.json) — valor único por chamada (`NBest[0].Confidence` do resultado detalhado do Azure Speech SDK), nativamente em `[0.0, 1.0]`, sem uso de média por palavra nesta versão. Referenciado em `data-model.md` (Entity TranscriptionResult).
 
 ---
 
@@ -58,5 +58,4 @@
 - Checklist gerado como gate pré-implementação, antes de `/speckit-plan`
 - Foco: qualidade dos requisitos das fórmulas de score (FR-003, FR-007, FR-008)
 - Audiência: autor da spec (auto-revisão)
-- **Gate status (2026-07-12)**: 15/16 itens resolvidos na spec. CHK003 pendente para `/speckit-plan` (contrato do serviço de transcrição). A spec está pronta para avançar ao plano.
-- Pendências para `/speckit-plan`: CHK003 — origem e granularidade de `confiança_transcrição` (contrato Azure Speech)
+- **Gate status (2026-07-13)**: 16/16 itens resolvidos. CHK003 resolvido via remediação de `/speckit-analyze` com criação de `contracts/transcription.json`. Nenhuma pendência aberta neste checklist.

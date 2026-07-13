@@ -46,6 +46,12 @@
       "exclusiveMinimum": 0,
       "default": 50,
       "maximum": 50
+    },
+    "timeout_seconds": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "default": 60,
+      "description": "Limite de latencia parametrizavel de NFR-001. Excedido nao aborta o processamento; gera evidencias.excedeu_limite_latencia=true no alerta (SC-007)."
     }
   },
   "examples": [
@@ -55,7 +61,8 @@
       "language": "pt-BR",
       "source": "pt_br_demo",
       "max_duration_seconds": 600,
-      "max_size_mb": 50
+      "max_size_mb": 50,
+      "timeout_seconds": 60
     }
   ]
 }

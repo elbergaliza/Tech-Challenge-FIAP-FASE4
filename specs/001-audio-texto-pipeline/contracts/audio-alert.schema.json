@@ -100,6 +100,15 @@
             "low_confidence",
             "failed"
           ]
+        },
+        "duracao_processamento_ms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Duracao total do pipeline em milissegundos (NFR-001)."
+        },
+        "excedeu_limite_latencia": {
+          "type": "boolean",
+          "description": "true quando duracao_processamento_ms excede timeout_seconds configurado (SC-007)."
         }
       }
     }
@@ -181,7 +190,9 @@
         "fontes_risco": [
           "texto"
         ],
-        "status_transcricao": "success"
+        "status_transcricao": "success",
+        "duracao_processamento_ms": 4200,
+        "excedeu_limite_latencia": false
       }
     }
   ]

@@ -58,7 +58,8 @@ specs/001-audio-texto-pipeline/
 │   ├── audio-input.schema.json
 │   ├── audio-alert.schema.json
 │   ├── cli.md
-│   └── python-api.md
+│   ├── python-api.md
+│   └── transcription.json
 └── tasks.md              # criado depois por /speckit-tasks
 ```
 
@@ -113,6 +114,7 @@ Artefatos de design criados:
 - `contracts/audio-alert.schema.json`: contrato JSON do alerta final.
 - `contracts/cli.md`: contrato da CLI Typer.
 - `contracts/python-api.md`: contrato da API Python importavel.
+- `contracts/transcription.json`: contrato de origem/granularidade da confianca do Azure Speech (resolve CHK003; adicionado via remediacao de `/speckit-analyze`).
 - `quickstart.md`: setup local, comandos `uv`, variaveis de ambiente e validacoes esperadas.
 
 ## Post-Design Constitution Check

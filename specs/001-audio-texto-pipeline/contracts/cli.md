@@ -21,6 +21,7 @@ Processar uma unica gravacao WAV/MP3 e gerar um alerta JSON padronizado do modul
 | `--processed-dir` | no | Diretorio para artefatos intermediarios; default `data/processed`. |
 | `--max-duration-seconds` | no | Default `600`. |
 | `--max-size-mb` | no | Default `50`. |
+| `--timeout-seconds` | no | Default `60`. Limite de latencia parametrizavel de NFR-001; excedido nao aborta o processamento, mas marca `evidencias.excedeu_limite_latencia=true` no alerta e gera log de falha de performance (SC-007). |
 
 ## Environment
 

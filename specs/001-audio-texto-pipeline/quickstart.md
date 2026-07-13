@@ -100,6 +100,8 @@ Cobertura minima esperada:
 - Entrada invalida sem gerar alerta.
 - Gravacao sem fala compreensivel gerando alerta valido por sinais acusticos.
 - Mock de Azure Speech e Azure Text Analytics sem credenciais reais.
+- Latencia dentro e acima do `timeout_seconds` configurado, com `evidencias.excedeu_limite_latencia` e log de falha de performance coerentes (NFR-001/SC-007).
+- Validacao por amostragem: subconjunto de amostras sem queixas classificado como "baixo"/"nenhuma" em pelo menos 90% dos casos (SC-006).
 
 ## 7. Fora de escopo neste quickstart
 

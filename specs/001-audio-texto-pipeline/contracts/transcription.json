@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tech-challenge-fiap-fase4.local/contracts/transcription.json",
+  "title": "AzureSpeechTranscriptionContract",
+  "description": "Contrato de integracao com Azure Speech to Text (azure-cognitiveservices-speech), documentando a origem exata de TranscriptionResult.confidence usado na formula de FR-003/data-model.md. Resolve CHK003 do checklist score-formula.md.",
+  "type": "object",
+  "properties": {
+    "confidence_source": {
+      "type": "string",
+      "const": "azure_speech_nbest_confidence",
+      "description": "confidence = NBest[0].Confidence do resultado detalhado do Azure Speech SDK (SpeechRecognitionResult com OutputFormat.Detailed), obtido via result.properties.get(PropertyId.SpeechServiceResponse_JsonResult) e parseado como JSON."
+    },
+    "granularity": {
+      "type": "string",
+      "const": "per_utterance_single_value",
+      "description": "Um unico valor de confianca por chamada de recognize_once() (por gravacao), nao uma media por palavra. Confianca por palavra (NBest[i].Words[*].Confidence) existe no payload do Azure mas NAO e usada nesta feature (fora do escopo do MVP)."
+    },
+    "scale": {
+      "type": "string",
+      "const": "0.0_to_1.0_native",
+      "description": "Azure Speech ja retorna Confidence no intervalo [0.0, 1.0] para reconhecimento de fala; nao requer normalizacao adicional no caminho feliz. O adaptador (src/audio_azure.py) MUST ainda clamar o valor para [0.0, 1.0] como defesa contra respostas inesperadas do servico, conforme Assumptions de spec.md."
+    },
+    "fallback_when_absent": {
+      "type": "string",
+      "const": "confidence_zero_status_no_speech",
+      "description": "Quando NBest esta vazio ou ausente (nenhuma fala reconhecida), TranscriptionResult.status = 'no_speech' e TranscriptionResult.confidence = 0.0. Quando o servico falha (erro de rede/autenticacao), status = 'failed' e confidence = 0.0."
+    }
+  },
+  "required": [
+    "confidence_source",
+    "granularity",
+    "scale",
+    "fallback_when_absent"
+  ],
+  "examples": [
+    {
+      "confidence_source": "azure_speech_nbest_confidence",
+      "granularity": "per_utterance_single_value",
+      "scale": "0.0_to_1.0_native",
+      "fallback_when_absent": "confidence_zero_status_no_speech"
+    }
+  ]
+}

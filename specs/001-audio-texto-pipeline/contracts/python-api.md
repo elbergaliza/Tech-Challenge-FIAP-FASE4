@@ -1,10 +1,10 @@
-# Python API Contract: `src.audio_pipeline`
+# Python API Contract: `src.audio.audio_pipeline`
 
 ## Public import
 
 ```python
-from src.audio_pipeline import process_audio_recording
-from src.audio_schemas import AudioAlert, AudioProcessingRequest
+from src.audio.audio_pipeline import process_audio_recording
+from src.audio.audio_schemas import AudioAlert, AudioProcessingRequest
 ```
 
 ## Function: `process_audio_recording`
@@ -20,7 +20,7 @@ Processar uma unica gravacao local e retornar o alerta padronizado do modulo `au
 
 ## Input contract
 
-`request` deve seguir `contracts/audio-input.schema.json` e ser validado por Pydantic v2.
+`request` deve seguir `contracts/audio/audio-input.schema.json` e ser validado por Pydantic v2.
 
 Regras obrigatorias:
 
@@ -32,7 +32,7 @@ Regras obrigatorias:
 
 ## Output contract
 
-Retorna `AudioAlert`, validado por Pydantic v2 e serializavel conforme `contracts/audio-alert.schema.json`.
+Retorna `AudioAlert`, validado por Pydantic v2 e serializavel conforme `contracts/audio/audio-alert.schema.json`.
 
 Invariantes obrigatorias:
 
@@ -63,8 +63,8 @@ Falhas parciais de transcricao/text analytics nao devem vazar credenciais nem co
 
 ## Side effects
 
-- Pode gravar artefatos intermediarios em `data/processed/`.
-- Pode gravar o alerta final em `data/reports/` quando chamado via CLI ou quando configurado explicitamente.
+- Pode gravar artefatos intermediarios em `data/audio/processed/`.
+- Pode gravar o alerta final em `data/audio/reports/` quando chamado via CLI ou quando configurado explicitamente.
 - Deve emitir logs estruturados por etapa com duracao, status e `patient_id` anonimizado/referencia.
 - Nao deve logar audio bruto, transcricao ou termos criticos.
 - Deve medir a duracao total do pipeline e comparar com `request.timeout_seconds` (default `60`, NFR-001). Exceder o limite NAO aborta o processamento nem gera excecao; MUST apenas marcar `AudioAlert.evidencias.excedeu_limite_latencia = true` e emitir log de falha de performance observavel (SC-007).

@@ -8,7 +8,7 @@
 
 Implementar o modulo de audio como biblioteca Python importavel e CLI minima, processando uma gravacao por invocacao para gerar exatamente um alerta JSON padronizado com `modulo = "audio_texto"`. A Camada A e obrigatoria e usa Azure Speech to Text (`pt-BR`) e Azure Text Analytics sobre a transcricao; a Camada B entra apenas no escopo minimo, com heuristicas acusticas simples de intensidade, pausas e RMS usando `pydub`/`librosa`, sem MFCC ou espectrograma completo nesta fase.
 
-O modulo permanece desacoplado de `video_pipeline`, `text_pipeline`, `fusion`, `anomaly` e `alerts`. A persistencia sera em filesystem local (`data/processed/` e `data/reports/`), sem banco, ORM, API web, Flask, autenticacao ou autorizacao de usuario.
+O modulo permanece desacoplado de `video_pipeline`, `text_pipeline`, `fusion`, `anomaly` e `alerts`. A persistencia sera em filesystem local (`data/audio/processed/` e `data/audio/reports/`), sem banco, ORM, API web, Flask, autenticacao ou autorizacao de usuario.
 
 ## Technical Context
 
@@ -16,7 +16,7 @@ O modulo permanece desacoplado de `video_pipeline`, `text_pipeline`, `fusion`, `
 
 **Primary Dependencies**: `azure-cognitiveservices-speech`, `azure-ai-textanalytics`, `python-dotenv`, `moviepy`, `pydub`, `librosa`, `pydantic`, `typer`; dev/test: `pytest`, `pytest-mock`, `ruff`, `pyright`; `structlog` opcional, mantendo fallback com `logging` padrao.
 
-**Storage**: Filesystem local. Entradas em `data/raw/`, artefatos intermediarios em `data/processed/` e alertas finais em `data/reports/`; sem banco de dados, ORM ou storage remoto nesta feature.
+**Storage**: Filesystem local. Entradas em `data/raw/`, artefatos intermediarios em `data/audio/processed/` e alertas finais em `data/audio/reports/`; sem banco de dados, ORM ou storage remoto nesta feature.
 
 **Testing**: `pytest` para testes unitarios por etapa, mocks das APIs Azure, testes de contrato do schema Pydantic do alerta e entrada, fixtures locais para amostras Coswara/PT-BR; integracao Azure opcional com VCR/fixtures controladas; `ruff` e `pyright` conforme constituicao.
 
@@ -66,21 +66,21 @@ specs/001-audio-texto-pipeline/
 ### Source Code (repository root)
 
 ```text
-src/
+src/audio/
 ├── audio_pipeline.py      # API publica importavel e orquestracao single-recording
 ├── audio_cli.py           # CLI Typer minima
 ├── audio_schemas.py       # modelos Pydantic v2 de entrada, intermediarios e alerta
 ├── audio_azure.py         # adaptadores Azure Speech/Text Analytics
 ├── audio_acoustics.py     # heuristicas minimas pydub/librosa
 ├── audio_scoring.py       # regras FR-003, FR-007 e FR-008
-└── audio_storage.py       # escrita JSON em data/processed e data/reports
+└── audio_storage.py       # escrita JSON em data/audio/processed e data/audio/reports
 
-tests/
+tests/audio/
 ├── contract/
 │   ├── test_audio_input_contract.py
 │   └── test_audio_alert_contract.py
 ├── integration/
-│   └── test_audio_pipeline_with_fixtures.py
+│   └── test_audio_batch_sample_validation.py
 └── unit/
     ├── test_audio_scoring.py
     ├── test_audio_acoustics.py
@@ -91,11 +91,12 @@ data/
 ├── raw/
 │   ├── coswara/           # local, nao versionado
 │   └── pt-br/             # 2-3 WAV locais para demo, nao versionados
-├── processed/             # transcricoes/metadados sem segredos
-└── reports/               # alerta JSON padronizado
+└── audio/
+    ├── processed/         # transcricoes/metadados sem segredos
+    └── reports/           # alerta JSON padronizado
 ```
 
-**Structure Decision**: Usar projeto Python unico com `src/` no repositorio raiz. `src/audio_pipeline.py` sera o ponto importavel principal; os demais arquivos so existem para manter responsabilidades pequenas e testaveis dentro do limite do modulo de audio. Nao criar `backend/`, `frontend/`, Flask, FastAPI, banco, ORM ou autenticacao nesta feature.
+**Structure Decision**: Usar projeto Python unico com `src/` no repositorio raiz. O ponto principal deste projeto e a funcionalidade de audio; por isso os fontes do modulo ficarao em `src/audio/` (nao espalhados direto em `src/`). `src/audio/audio_pipeline.py` sera o ponto importavel principal; os demais arquivos do pacote existem para manter responsabilidades pequenas e testaveis dentro do limite do modulo de audio. Nao criar `backend/`, `frontend/`, Flask, FastAPI, banco, ORM ou autenticacao nesta feature.
 
 ## Complexity Tracking
 

@@ -18,7 +18,7 @@
     "scale": {
       "type": "string",
       "const": "0.0_to_1.0_native",
-      "description": "Azure Speech ja retorna Confidence no intervalo [0.0, 1.0] para reconhecimento de fala; nao requer normalizacao adicional no caminho feliz. O adaptador (src/audio_azure.py) MUST ainda clamar o valor para [0.0, 1.0] como defesa contra respostas inesperadas do servico, conforme Assumptions de spec.md."
+      "description": "Azure Speech ja retorna Confidence no intervalo [0.0, 1.0] para reconhecimento de fala; nao requer normalizacao adicional no caminho feliz. O adaptador (src/audio/audio_azure.py) MUST ainda clamar o valor para [0.0, 1.0] como defesa contra respostas inesperadas do servico, conforme Assumptions de spec.md."
     },
     "fallback_when_absent": {
       "type": "string",

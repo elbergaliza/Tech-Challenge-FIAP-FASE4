@@ -3,7 +3,7 @@
 ## Command
 
 ```text
-uv run python -m src.audio_cli process --patient-id <id> --audio-path <path> [--output-dir data/reports] [--processed-dir data/processed]
+uv run python -m src.audio.audio_cli process --patient-id <id> --audio-path <path> [--output-dir data/audio/reports] [--processed-dir data/audio/processed]
 ```
 
 ## Purpose
@@ -17,8 +17,8 @@ Processar uma unica gravacao WAV/MP3 e gerar um alerta JSON padronizado do modul
 | `--patient-id` | yes | Identificador anonimizado do paciente/amostra. |
 | `--audio-path` | yes | Caminho local para arquivo `.wav` ou `.mp3`. |
 | `--language` | no | Default `pt-BR`; outros idiomas fora do escopo. |
-| `--output-dir` | no | Diretorio para alerta final; default `data/reports`. |
-| `--processed-dir` | no | Diretorio para artefatos intermediarios; default `data/processed`. |
+| `--output-dir` | no | Diretorio para alerta final; default `data/audio/reports`. |
+| `--processed-dir` | no | Diretorio para artefatos intermediarios; default `data/audio/processed`. |
 | `--max-duration-seconds` | no | Default `600`. |
 | `--max-size-mb` | no | Default `50`. |
 | `--timeout-seconds` | no | Default `60`. Limite de latencia parametrizavel de NFR-001; excedido nao aborta o processamento, mas marca `evidencias.excedeu_limite_latencia=true` no alerta e gera log de falha de performance (SC-007). |
@@ -38,11 +38,11 @@ O comando nao aceita chaves de API por argumento.
 
 Em sucesso:
 
-- Cria exatamente um arquivo JSON em `data/reports/` ou no diretorio definido por `--output-dir`.
+- Cria exatamente um arquivo JSON em `data/audio/reports/` ou no diretorio definido por `--output-dir`.
 - Imprime somente o caminho do relatorio e um status resumido.
 - Nao imprime audio, transcricao, termos criticos nem credenciais.
 
-Formato do JSON: `contracts/audio-alert.schema.json`.
+Formato do JSON: `contracts/audio/audio-alert.schema.json`.
 
 Em erro de entrada:
 

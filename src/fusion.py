@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from typing import Any
 
 
 class MultimodalFusion:
@@ -11,24 +12,24 @@ class MultimodalFusion:
     def __init__(self):
         pass
 
-    def load_alerts(self, file_path: str):
+    def load_alerts(self, file_path: str) -> list[dict[str, Any]]:
         path = Path(file_path)
 
         if not path.exists():
             print(f"Arquivo não encontrado: {file_path}")
             return []
 
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
 
-    def calculate_final_score(self, alerts):
+    def calculate_final_score(self, alerts: list[dict[str, Any]]) -> float:
         if not alerts:
             return 0.0
 
         scores = [float(alert["score_risco"]) for alert in alerts]
         return round(sum(scores) / len(scores), 3)
 
-    def classify_risk(self, score):
+    def classify_risk(self, score: float) -> str:
         # Limiares de agregação da fusão (0.45 / 0.75) são independentes dos
         # limiares de cada módulo de origem (ex.: audio_texto usa 0.4 / 0.7 —
         # ver specs/001-audio-texto-pipeline/data-model.md). Não assumir que
@@ -39,7 +40,12 @@ class MultimodalFusion:
             return "moderado"
         return "baixo"
 
-    def generate_final_report(self, clinical_alerts, video_alerts, audio_alerts):
+    def generate_final_report(
+        self,
+        clinical_alerts: list[dict[str, Any]],
+        video_alerts: list[dict[str, Any]],
+        audio_alerts: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         all_alerts = clinical_alerts + video_alerts + audio_alerts
 
         score_final = self.calculate_final_score(all_alerts)
@@ -63,7 +69,7 @@ class MultimodalFusion:
             "recomendacao_final": recomendacao_final
         }
 
-    def _build_recommendation(self, risco_final):
+    def _build_recommendation(self, risco_final: str) -> str:
         if risco_final == "alto":
             return "Acionar equipe médica para reavaliação imediata do paciente."
         elif risco_final == "moderado":

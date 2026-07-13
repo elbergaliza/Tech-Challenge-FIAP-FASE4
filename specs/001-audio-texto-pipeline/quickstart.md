@@ -53,13 +53,13 @@ Nao versionar audio real de paciente ou dataset bruto.
 Exemplo para uma amostra PT-BR local:
 
 ```powershell
-uv run python -m src.audio_cli process --patient-id sample_ptbr_001 --audio-path data/raw/pt-br/sample_ptbr_001.wav
+uv run python -m src.audio.audio_cli process --patient-id sample_ptbr_001 --audio-path data/raw/pt-br/sample_ptbr_001.wav
 ```
 
 Resultado esperado:
 
-- Um JSON final em `data/reports/`.
-- Artefatos intermediarios em `data/processed/`, quando habilitados.
+- Um JSON final em `data/audio/reports/`.
+- Artefatos intermediarios em `data/audio/processed/`, quando habilitados.
 - Logs por etapa com duracao, status e `patient_id` de referencia.
 - Nenhum log contendo audio bruto, transcricao completa, termos clinicos ou credenciais.
 
@@ -68,8 +68,8 @@ Resultado esperado:
 Contrato esperado:
 
 ```python
-from src.audio_pipeline import process_audio_recording
-from src.audio_schemas import AudioProcessingRequest
+from src.audio.audio_pipeline import process_audio_recording
+from src.audio.audio_schemas import AudioProcessingRequest
 
 request = AudioProcessingRequest(
     patient_id="sample_ptbr_001",
@@ -80,7 +80,7 @@ alert = process_audio_recording(request)
 print(alert.model_dump_json())
 ```
 
-`alert` deve validar contra `specs/001-audio-texto-pipeline/contracts/audio-alert.schema.json`.
+`alert` deve validar contra `specs/001-audio-texto-pipeline/contracts/audio/audio-alert.schema.json`.
 
 ## 6. Validar qualidade
 

@@ -54,7 +54,7 @@ Representa o resultado da Camada A de transcricao.
 - Origem, granularidade e escala de `confidence` estao documentadas em `contracts/transcription.json` (resolve CHK003 de `checklists/score-formula.md`): valor unico por chamada (`NBest[0].Confidence` do resultado detalhado do Azure Speech SDK), ja nativo em `[0.0, 1.0]`.
 - Confiança retornada em escala diferente do esperado deve ser normalizada no adaptador Azure antes de chegar ao dominio.
 - `failed` deve encerrar a etapa de transcricao, mas nao necessariamente o pipeline se houver sinais acusticos suficientes e o erro nao for de entrada invalida.
-- O texto transcrito pode ser persistido em `data/processed/` para auditoria, mas nunca deve ser logado.
+- O texto transcrito pode ser persistido em `data/audio/processed/` para auditoria, mas nunca deve ser logado.
 
 ## Entity: AcousticFeatures
 
@@ -165,6 +165,6 @@ Falhas de entrada nao geram `AudioAlert`. Falhas parciais de servico externo dev
 
 ## Persistence
 
-- `data/processed/`: metadados tecnicos, transcricao e resultados intermediarios controlados.
-- `data/reports/`: um JSON final por gravacao processada com sucesso.
+- `data/audio/processed/`: metadados tecnicos, transcricao e resultados intermediarios controlados.
+- `data/audio/reports/`: um JSON final por gravacao processada com sucesso.
 - Logs: somente etapa, duracao, status, identificador anonimizado e score; sem audio, transcricao ou termos clinicos.

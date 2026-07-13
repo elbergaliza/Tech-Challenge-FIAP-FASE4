@@ -235,17 +235,31 @@ env/
 .DS_Store
 Thumbs.db
 
-# Dados e artefatos gerados
-**/data/raw/*
-**/data/processed/*
-**/models/*
-**/outputs/*
+# Dados e artefatos gerados (conteúdo local; estrutura via .gitkeep)
+data/raw/**
+!data/raw/
+!data/raw/.gitkeep
+!data/raw/README.md
 
-# Mantém estrutura de pastas
-!**/data/raw/.gitkeep
-!**/data/raw/README.md
-!**/data/processed/.gitkeep
+# Coswara — pasta sim, dataset (WAV/JSON via junction) não
+!data/raw/coswara/
+!data/raw/coswara/.gitkeep
+
+# Amostras PT-BR — pasta sim, áudios locais não
+!data/raw/pt-br/
+!data/raw/pt-br/.gitkeep
+
+data/audio/processed/**
+!data/audio/processed/
+!data/audio/processed/.gitkeep
+
+data/audio/reports/**
+!data/audio/reports/
+!data/audio/reports/.gitkeep
+
+**/models/*
 !**/models/.gitkeep
+**/outputs/*
 !**/outputs/.gitkeep
 
 
@@ -258,10 +272,6 @@ Thumbs.db
 docs/spec/
 # Meus Prompts — configurações e templates de prompts para a IA
 docs/PROMPTS/
-
-########DATASET########
-# Dataset — arquivos de áudio, vídeo e dados brutos do Tech Challenge (volume alto, uso local)
-dataset/
 
 #######OUTROS########
 AGENTS.md

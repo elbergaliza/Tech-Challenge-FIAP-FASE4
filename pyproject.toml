@@ -4,4 +4,50 @@ version = "0.1.0"
 description = "Tech Challenge Fase 4 - Sistema de **monitoramento clínico multimodal** que ingere vídeo, áudio e texto, processa cada modalidade com as técnicas ensinadas no curso, funde os resultados, aplica **detecção de anomalias** e dispara **alertas** para a equipe médica."
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "azure-ai-textanalytics>=5.4.0",
+    "azure-cognitiveservices-speech>=1.50.0",
+    "librosa>=0.11.0",
+    "moviepy>=2.2.1",
+    "pydantic>=2.13.4",
+    "pydub>=0.25.1",
+    "python-dotenv>=1.2.2",
+    "typer>=0.26.8",
+]
+
+[dependency-groups]
+dev = [
+    "jsonschema>=4.26.0",
+    "pyright>=1.1.411",
+    "pytest>=9.1.1",
+    "pytest-mock>=3.15.1",
+    "ruff>=0.15.21",
+]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "W"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pyright]
+pythonVersion = "3.14"
+typeCheckingMode = "strict"
+include = ["src"]
+reportMissingTypeStubs = false
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
+reportMissingTypeArgument = false
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

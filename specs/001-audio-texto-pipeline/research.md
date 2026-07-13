@@ -11,7 +11,7 @@
 
 ## Decision: Biblioteca Python importavel + CLI Typer minima
 
-**Rationale**: A feature precisa ser executavel localmente e consumivel por testes/etapas futuras sem expor API web. `Typer` oferece CLI simples e tipada, enquanto `src/audio_pipeline.py` permanece como ponto importavel principal para orquestracao de uma gravacao por invocacao.
+**Rationale**: A feature precisa ser executavel localmente e consumivel por testes/etapas futuras sem expor API web. `Typer` oferece CLI simples e tipada, enquanto `src/audio/audio_pipeline.py` permanece como ponto importavel principal para orquestracao de uma gravacao por invocacao.
 
 **Alternatives considered**:
 
@@ -36,7 +36,7 @@
 - Argumentos CLI com chaves de API: aumenta risco de aparecerem em historico de shell/logs.
 - Arquivo de configuracao versionado: inadequado para segredos e contrario ao principio VIII.
 
-## Decision: Filesystem local JSON em `data/processed/` e `data/reports/`
+## Decision: Filesystem local JSON em `data/audio/processed/` e `data/audio/reports/`
 
 **Rationale**: O MVP nao precisa de consulta concorrente, historico complexo ou relacoes. Arquivos JSON sao suficientes para transcricoes/metadados intermediarios e alertas finais, facilitando auditoria, demo e testes de contrato.
 

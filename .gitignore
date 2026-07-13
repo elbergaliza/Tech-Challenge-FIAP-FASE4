@@ -263,3 +263,5 @@ docs/PROMPTS/
 # Dataset — arquivos de áudio, vídeo e dados brutos do Tech Challenge (volume alto, uso local)
 dataset/
 
+#######OUTROS########
+AGENTS.md

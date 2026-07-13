@@ -1,0 +1,188 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tech-challenge-fiap-fase4.local/contracts/audio-alert.schema.json",
+  "title": "AudioAlert",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "patient_id",
+    "modulo",
+    "tipo_anomalia",
+    "score_risco",
+    "nivel_risco",
+    "descricao",
+    "recomendacao"
+  ],
+  "properties": {
+    "patient_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identificador anonimizado do paciente ou da amostra."
+    },
+    "modulo": {
+      "type": "string",
+      "const": "audio_texto"
+    },
+    "tipo_anomalia": {
+      "type": "string",
+      "minLength": 1,
+      "examples": [
+        "nenhuma",
+        "alteracao_respiratoria_vocal",
+        "termos_criticos",
+        "sinais_acusticos",
+        "baixa_confianca_transcricao"
+      ]
+    },
+    "score_risco": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0
+    },
+    "nivel_risco": {
+      "type": "string",
+      "enum": [
+        "baixo",
+        "moderado",
+        "alto"
+      ]
+    },
+    "descricao": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Resumo humano dos achados que fundamentam o score. Nao deve conter credenciais."
+    },
+    "recomendacao": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidencias": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "score_acustico": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "score_textual": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "score_textual_efetivo": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "confianca_transcricao": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "fontes_risco": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "acustico",
+              "texto",
+              "transcricao_baixa_confianca"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "status_transcricao": {
+          "type": "string",
+          "enum": [
+            "success",
+            "no_speech",
+            "low_confidence",
+            "failed"
+          ]
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "score_risco": {
+            "exclusiveMaximum": 0.4
+          }
+        },
+        "required": [
+          "score_risco"
+        ]
+      },
+      "then": {
+        "properties": {
+          "nivel_risco": {
+            "const": "baixo"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "score_risco": {
+            "minimum": 0.4,
+            "exclusiveMaximum": 0.7
+          }
+        },
+        "required": [
+          "score_risco"
+        ]
+      },
+      "then": {
+        "properties": {
+          "nivel_risco": {
+            "const": "moderado"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "score_risco": {
+            "minimum": 0.7
+          }
+        },
+        "required": [
+          "score_risco"
+        ]
+      },
+      "then": {
+        "properties": {
+          "nivel_risco": {
+            "const": "alto"
+          }
+        }
+      }
+    }
+  ],
+  "examples": [
+    {
+      "patient_id": "sample_ptbr_001",
+      "modulo": "audio_texto",
+      "tipo_anomalia": "alteracao_respiratoria_vocal",
+      "score_risco": 0.81,
+      "nivel_risco": "alto",
+      "descricao": "Paciente apresenta relato e sinais compativeis com risco respiratorio/vocal.",
+      "recomendacao": "Encaminhar para avaliacao respiratoria.",
+      "evidencias": {
+        "score_acustico": 0.3,
+        "score_textual": 0.9,
+        "score_textual_efetivo": 0.81,
+        "confianca_transcricao": 0.9,
+        "fontes_risco": [
+          "texto"
+        ],
+        "status_transcricao": "success"
+      }
+    }
+  ]
+}

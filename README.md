@@ -17,17 +17,14 @@ Detectar possíveis anomalias clínicas em pacientes de UTI a partir de dados es
 * recomendação para a equipe médica.
 
 ## Dataset audio
-
+Em um projeto separado, crie:
 Dataset: https://github.com/iiscleap/coswara-data
+Realize a extração dos audios com .\dataset\Coswara-Data\extract_data.py
+Os audio serao extraidos para <pasta do GIT do COSAWARA>\Coswara-Data\Extracted_data
 
 # Dataset
-
-Monte o dataset nesta pasta:
-https://github.com/iiscleap/Coswara-Data.git
-
-Realize a extração dos audios com .\dataset\Coswara-Data\extract_data.py
-Os audio serao extraidos para 
-.dataset\Coswara-Data\Extracted_data\AAAAmmmddd\<pasta de extracao>\*.wav
+Mapeie os arquivos WAv na pasta,conforme comando abaixo:
+mklink /J "<Pasta raiz do TECHCHALENGE>\data\raw\coswara" "<pasta do GIT do COSAWARA>\Coswara-Data\Extracted_data"
 
 
 ## Dataset utilizado

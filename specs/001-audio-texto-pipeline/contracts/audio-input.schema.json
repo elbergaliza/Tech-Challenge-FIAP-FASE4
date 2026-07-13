@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tech-challenge-fiap-fase4.local/contracts/audio-input.schema.json",
+  "title": "AudioProcessingRequest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "patient_id",
+    "audio_path"
+  ],
+  "properties": {
+    "patient_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identificador anonimizado do paciente ou da amostra."
+    },
+    "audio_path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Caminho local para arquivo WAV ou MP3."
+    },
+    "language": {
+      "type": "string",
+      "default": "pt-BR",
+      "const": "pt-BR",
+      "description": "Idioma suportado nesta feature."
+    },
+    "source": {
+      "type": "string",
+      "enum": [
+        "pt_br_demo",
+        "coswara",
+        "manual",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "max_duration_seconds": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "default": 600,
+      "maximum": 600
+    },
+    "max_size_mb": {
+      "type": "integer",
+      "exclusiveMinimum": 0,
+      "default": 50,
+      "maximum": 50
+    }
+  },
+  "examples": [
+    {
+      "patient_id": "sample_ptbr_001",
+      "audio_path": "data/raw/pt-br/sample_ptbr_001.wav",
+      "language": "pt-BR",
+      "source": "pt_br_demo",
+      "max_duration_seconds": 600,
+      "max_size_mb": 50
+    }
+  ]
+}

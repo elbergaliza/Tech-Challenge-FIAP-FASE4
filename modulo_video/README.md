@@ -133,8 +133,3 @@ esperado"). O `calibrar.py` usa esse rótulo para ajustar os limiares em `config
 > - *KIMORE*: o vídeo RGB só é liberado sob pedido ao autor e assinatura de EULA;
 >   o download público traz apenas depth + esqueleto (mesma limitação acima).
 
-## Próximos passos (evolução)
-
-- Calibrar os limiares em `config.py` com o dataset **REHAB24-6** (`calibrar.py`).
-- Opcional: treinar um **Isolation Forest** sobre as métricas (ver TODO em `anomaly_detector.py`).
-- Integrar com os módulos de áudio e clínico na etapa de fusão.

@@ -1,0 +1,118 @@
+"""
+anomaly_detector.py
+--------------------
+ETAPA 3 do pipeline: METRICAS -> ANOMALIAS (desvios).
+
+Aplica REGRAS CLINICAS SIMPLES (comparacao com os limiares do config) para
+transformar numeros em achados interpretaveis. Cada anomalia detectada vem
+com:
+  - chave    : identificador usado nos pesos (config.PESOS_ANOMALIA)
+  - descricao: texto legivel para o relatorio
+  - gravidade: 0 a 1 (o quanto o valor passou do limiar)
+
+OBS: aqui usamos regras (facil de explicar para a banca). Um proximo passo
+opcional seria trocar/complementar por um modelo nao supervisionado
+(ex.: Isolation Forest) sobre as metricas -- deixamos um TODO no fim.
+"""
+
+from __future__ import annotations
+
+from config import LIMIARES
+
+
+def _gravidade(valor: float, limiar: float, teto: float) -> float:
+    """
+    Normaliza o quanto 'valor' ultrapassou 'limiar' em uma escala 0..1.
+    'teto' eh o valor a partir do qual consideramos gravidade maxima (1.0).
+    """
+    if valor <= limiar:
+        return 0.0
+    return min((valor - limiar) / (teto - limiar + 1e-9), 1.0)
+
+
+def detectar_anomalias(metricas: dict, limiares: dict | None = None) -> list[dict]:
+    """Recebe as metricas biomecanicas e devolve a lista de anomalias.
+
+    'limiares' permite passar um conjunto alternativo (ex.: calibrado). Se None,
+    usa os do config.py (os chutes).
+    """
+    if limiares is None:
+        limiares = LIMIARES
+    anomalias: list[dict] = []
+
+    # --- Regra 1: inclinacao excessiva do tronco ---------------------------
+    inc = metricas["inclinacao_tronco_graus"]
+    lim = limiares["inclinacao_tronco_graus"]
+    if inc > lim:
+        anomalias.append({
+            "chave": "inclinacao_tronco",
+            "descricao": f"Inclinacao excessiva do tronco ({inc:.1f} graus).",
+            "gravidade": _gravidade(inc, lim, teto=lim * 2),
+        })
+
+    # --- Regra 2: assimetria de marcha -------------------------------------
+    ass = metricas["assimetria_marcha"]
+    lim = limiares["assimetria_marcha"]
+    if ass > lim:
+        anomalias.append({
+            "chave": "assimetria_marcha",
+            "descricao": f"Assimetria de passada entre as pernas ({ass*100:.0f}%).",
+            "gravidade": _gravidade(ass, lim, teto=lim * 2.5),
+        })
+
+    # --- Regra 3: instabilidade / perda de equilibrio ----------------------
+    inst = metricas["instabilidade_lateral"]
+    lim = limiares["instabilidade_lateral"]
+    if inst > lim:
+        anomalias.append({
+            "chave": "instabilidade",
+            "descricao": "Oscilacao lateral elevada (perda de estabilidade).",
+            "gravidade": _gravidade(inst, lim, teto=lim * 2.5),
+        })
+
+    # --- Regra 4: velocidade fora do padrao --------------------------------
+    vel = metricas["velocidade"]
+    vmin, vmax = limiares["velocidade_min"], limiares["velocidade_max"]
+    if vel < vmin or vel > vmax:
+        sentido = "abaixo" if vel < vmin else "acima"
+        anomalias.append({
+            "chave": "velocidade_anormal",
+            "descricao": f"Velocidade de marcha {sentido} do esperado ({vel:.3f}).",
+            # Gravidade fixa moderada; refine com dados reais.
+            "gravidade": 0.6,
+        })
+
+    # --- Regra 5: possivel queda do paciente (YOLOv8) ---------------------
+    # Usamos .get() porque a deteccao de objetos pode estar desligada (--sem-objetos).
+    pq = metricas.get("prop_frames_queda", 0.0)
+    lim = limiares["prop_frames_queda"]
+    if pq > lim:
+        anomalias.append({
+            "chave": "queda",
+            "descricao": f"Possivel queda (pessoa no chao) em {pq*100:.0f}% dos frames.",
+            "gravidade": _gravidade(pq, lim, teto=min(lim * 3, 1.0)),
+        })
+
+    # --- Regra 6: paciente ausente / rastreamento perdido (YOLOv8) --------
+    ps = metricas.get("prop_frames_sem_pessoa", 0.0)
+    lim = limiares["prop_frames_sem_pessoa"]
+    if ps > lim:
+        anomalias.append({
+            "chave": "paciente_ausente",
+            "descricao": f"Paciente ausente ou fora do quadro em {ps*100:.0f}% dos frames.",
+            "gravidade": _gravidade(ps, lim, teto=1.0),
+        })
+
+    # --- Regra 7: numero de pessoas acima do esperado (YOLOv8) ------------
+    max_pessoas = metricas.get("max_pessoas", 0)
+    esperado = limiares["pessoas_esperadas"]
+    if max_pessoas > esperado:
+        anomalias.append({
+            "chave": "multiplas_pessoas",
+            "descricao": f"Multiplas pessoas no quadro (ate {max_pessoas}); pode interferir na analise.",
+            "gravidade": 0.4,
+        })
+
+    # TODO (evolucao): treinar um Isolation Forest com as metricas de varios
+    # pacientes "normais" e usar o score de anomalia como validacao extra.
+    return anomalias

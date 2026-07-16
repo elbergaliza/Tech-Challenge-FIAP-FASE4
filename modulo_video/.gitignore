@@ -1,0 +1,48 @@
+# Ambiente virtual
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Arquivos de video (pesados demais para o git)
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# Saidas geradas pelo pipeline
+data/entrada/*
+data/saida/*
+!data/entrada/.gitkeep
+!data/saida/.gitkeep
+
+# Exemplos para o relatorio tecnico: versiona apenas os JSON de exemplo.
+# Midias (mp4/avi/...) continuam ignoradas pelas regras acima.
+data/exemplos/*
+!data/exemplos/.gitkeep
+!data/exemplos/*.json
+!data/exemplos/*.csv
+!data/exemplos/*.md
+
+# Material das aulas (PDFs do curso, personalizados/protegidos: nao versionar)
+Aulas/
+
+# Modelos YOLO baixados automaticamente na primeira execucao
+*.pt
+
+# Dataset REHAB24-6 (grande / publico no Zenodo: nao versionar)
+*.zip
+Segmentation.csv
+REHAB24-6/
+
+# Editores / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -10,12 +10,12 @@
 
 ```
 Phase 1 — Foundation (Sequential)
-  T1 → T2
+  T1 → T2 → T2b
 
 Phase 2 — Core Implementation (Parallel OK)
-  T2 ──┬── T3 [P]
-       ├── T4 [P]
-       └── T5 [P]
+  T2b ──┬── T3 [P]
+        ├── T4 [P]
+        └── T5 [P]
 
 Phase 3 — Integration (Sequential)
   T3, T4, T5 → T6 → T7
@@ -25,9 +25,9 @@ Phase 4 — CI e Cleanup (Sequential)
 ```
 
 ```
-T1 ──► T2 ──┬──► T3 [P] ──┐
-             ├──► T4 [P] ──┼──► T6 ──► T7 ──► T8 ──► T9
-             └──► T5 [P] ──┘
+T1 ──► T2 ──► T2b ──┬──► T3 [P] ──┐
+                     ├──► T4 [P] ──┼──► T6 ──► T7 ──► T8 ──► T9
+                     └──► T5 [P] ──┘
 ```
 
 ---
@@ -73,21 +73,41 @@ T1 ──► T2 ──┬──► T3 [P] ──┐
 
 ---
 
+### T2b: Tornar `EICUDataLoader` flexível [P com T3]
+
+**What**: Modificar `EICUDataLoader.__init__` para aceitar `data_dir: Path | None = None`. Quando `None`, usa `config.DATA_RAW_DIR` (comportamento atual). Quando fornecido, usa o path passado. Compatibilidade retroativa garantida.
+**Where**: `eicu-anomaly-detection/src/data_loader.py`
+**Depends on**: T2
+**Requirement**: FUS-01, FUS-05
+
+**Done when**:
+- [ ] `EICUDataLoader(data_dir=None)` mantém comportamento atual
+- [ ] `EICUDataLoader(data_dir=Path("tests/fixtures/eicu/"))` usa o path passado para todos os arquivos CSV
+- [ ] `load_vital_periodic()`, `load_labs()`, `load_medications()` usam `self.data_dir / filename`
+- [ ] Testes existentes (se houver) continuam passando
+
+**Tests**: unit
+**Gate**: `python -c "from src.data_loader import EICUDataLoader; EICUDataLoader()"` sem erro
+
+**Commit**: `feat(eicu): EICUDataLoader aceita data_dir opcional`
+
+---
+
 ### T3: Implementar `ClinicalAdapter` [P]
 
-**What**: Criar `ClinicalAdapter(ModuleAdapter)` que injeta `eicu-anomaly-detection/src` no `sys.path`, chama `train.main()`, lê o `alerts.json` gerado e retorna `list[AlertaNormalizado]` com `sample_id` normalizado para `module_id`.
+**What**: Criar `ClinicalAdapter(ModuleAdapter)` que injeta `eicu-anomaly-detection/src` no `sys.path`, executa o pipeline clínico passando `data_dir` ao `EICUDataLoader`, e retorna `list[AlertaNormalizado]` com `sample_id` normalizado para `module_id`.
 **Where**: `fusion.py`
-**Depends on**: T2
-**Reuses**: `eicu-anomaly-detection/src/train.py:main()`
+**Depends on**: T2, T2b
+**Reuses**: `eicu-anomaly-detection/src/train.py`, `EICUDataLoader`
 **Requirement**: FUS-01, FUS-10
 
 **Done when**:
-- [ ] `ClinicalAdapter` implementa `ModuleAdapter`
+- [ ] `ClinicalAdapter(data_dir=None)` implementa `ModuleAdapter`
+- [ ] `__init__` aceita `data_dir: str | Path | None = None`
 - [ ] `sys.path` injeta `eicu-anomaly-detection/` e `eicu-anomaly-detection/src/` antes do import
-- [ ] Após `run()`, `alerts.json` em `eicu-anomaly-detection/modulo_anomalias/outputs/` é lido
+- [ ] Pipeline clínico roda passando `data_dir` ao `EICUDataLoader`
 - [ ] `sample_id` de cada alerta é mapeado para `module_id` no `AlertaNormalizado`
-- [ ] Se `alerts.json` não existe após execução, levanta `RuntimeError` com mensagem clara
-- [ ] Testes unitários cobrem: normalização de `sample_id`, comportamento com lista vazia
+- [ ] Testes unitários cobrem: normalização de `sample_id`, `data_dir` alternativo, lista vazia
 
 **Tests**: unit
 **Gate**: `pytest tests/test_fusion.py -k "clinical"` passa
@@ -152,9 +172,10 @@ T1 ──► T2 ──┬──► T3 [P] ──┐
 **Requirement**: FUS-01, FUS-03, FUS-04, FUS-05, FUS-17, FUS-18, FUS-19
 
 **Done when**:
-- [ ] `main.py` aceita `--video`, `--patient-id`, `--saida`, `--sem-objetos`, `--silencioso`
+- [ ] `main.py` aceita `--video`, `--patient-id`, `--eicu-data`, `--saida`, `--sem-objetos`, `--silencioso`
+- [ ] `--eicu-data` tem default `eicu-anomaly-detection/modulo_anomalias/data/raw/`
 - [ ] Valida existência do vídeo antes de chamar adaptadores — `sys.exit(1)` com mensagem
-- [ ] Valida existência de `eicu-anomaly-detection/modulo_anomalias/data/raw/vitalPeriodic.csv.gz` — `sys.exit(1)` com instrução de download
+- [ ] Valida existência do `--eicu-data` dir — `sys.exit(1)` com instrução de download
 - [ ] Cria `outputs/` se não existir
 - [ ] Salva `outputs/final_multimodal_report.json`
 - [ ] Imprime relatório formatado no terminal
@@ -239,10 +260,11 @@ T1 ──► T2 ──┬──► T3 [P] ──┐
 |------|--------|--------|
 | T1: Mover fusion.py | 1 operação de refactor | ✅ Granular |
 | T2: AlertaNormalizado + ModuleAdapter | 2 classes no mesmo arquivo, cohesivas | ✅ OK |
+| T2b: EICUDataLoader flexível | 1 modificação pontual em 1 arquivo | ✅ Granular |
 | T3: ClinicalAdapter | 1 classe | ✅ Granular |
 | T4: VideoAdapter | 1 classe | ✅ Granular |
 | T5: MultimodalFusion | 1 classe | ✅ Granular |
-| T6: main.py + fixtures + testes | 3 arquivos mas todos integração do mesmo passo | ✅ OK (colocados juntos pois testes dependem de main.py pronto) |
+| T6: main.py + fixtures + testes | 3 arquivos mas todos integração do mesmo passo | ✅ OK |
 | T7: E2E local | 1 validação | ✅ Granular |
 | T8: CI workflow | 1 arquivo | ✅ Granular |
 | T9: README | 1 arquivo | ✅ Granular |
@@ -255,9 +277,10 @@ T1 ──► T2 ──┬──► T3 [P] ──┐
 |------|------------------|---------------|--------|
 | T1 | None | Início | ✅ |
 | T2 | T1 | T1 → T2 | ✅ |
-| T3 | T2 | T2 → T3 | ✅ |
-| T4 | T2 | T2 → T4 | ✅ |
-| T5 | T2 | T2 → T5 | ✅ |
+| T2b | T2 | T2 → T2b | ✅ |
+| T3 | T2, T2b | T2b → T3 | ✅ |
+| T4 | T2 | T2b → T4 | ✅ |
+| T5 | T2 | T2b → T5 | ✅ |
 | T6 | T3, T4, T5 | T3,T4,T5 → T6 | ✅ |
 | T7 | T6 | T6 → T7 | ✅ |
 | T8 | T7 | T7 → T8 | ✅ |
@@ -271,6 +294,7 @@ T1 ──► T2 ──┬──► T3 [P] ──┐
 |------|--------------|-------------|---------|--------|
 | T1 | refactor (sem lógica) | none | none | ✅ |
 | T2 | dataclass + ABC | none (sem lógica) | none | ✅ |
+| T2b | EICUDataLoader modificado | unit | unit | ✅ |
 | T3 | ClinicalAdapter | unit | unit | ✅ |
 | T4 | VideoAdapter | unit | unit | ✅ |
 | T5 | MultimodalFusion | unit | unit | ✅ |

@@ -38,7 +38,8 @@ Os módulos rodam **sequencialmente** (clínico → vídeo). Não há estado com
 
 | Componente | Localização | Como reutilizar |
 |-----------|------------|----------------|
-| `train.main()` | `eicu-anomaly-detection/src/train.py:8` | Chamar direto via `sys.path` injection no `ClinicalAdapter` |
+| `EICUDataLoader` | `eicu-anomaly-detection/src/data_loader.py` | Modificar para aceitar `data_dir` opcional — `ClinicalAdapter` passa o path que quiser |
+| `train.main()` | `eicu-anomaly-detection/src/train.py:8` | Extrair lógica em função `run_pipeline(data_dir)` chamável pelo `ClinicalAdapter` |
 | `processar_video()` | `modulo_video/src/pipeline.py:81` | Chamar direto via `sys.path` injection no `VideoAdapter` |
 | `MultimodalFusion` | `src/fusion.py` (rascunho) | Refatorar no lugar — mover para `fusion.py` na raiz |
 | `alerta_agachamento.json` | `modulo_video/data/exemplos/` | Referência de schema para fixtures de teste |
@@ -100,11 +101,13 @@ Os módulos rodam **sequencialmente** (clínico → vídeo). Não há estado com
 - **Interface**:
   ```python
   class ClinicalAdapter(ModuleAdapter):
+      def __init__(self, data_dir: str | Path | None = None): ...
       def run(self) -> list[AlertaNormalizado]: ...
   ```
 - **Dependencies**: `eicu-anomaly-detection/src/` (via `sys.path`)
 - **Reuses**: `train.main()` — executa o pipeline completo e lê o `alerts.json` gerado
 - **Normalização**: `alert["sample_id"]` → `module_id`
+- **`data_dir`**: quando `None`, usa o path padrão `eicu-anomaly-detection/modulo_anomalias/data/raw/`. Quando fornecido, passa para `EICUDataLoader(data_dir=data_dir)`. Permite testes locais com fixtures e CI com path configurável.
 
 ---
 
@@ -151,14 +154,23 @@ Os módulos rodam **sequencialmente** (clínico → vídeo). Não há estado com
 - **Location**: `main.py` (raiz)
 - **Interface**:
   ```
-  python main.py --video <path> [--patient-id <id>] [--saida <path>] [--sem-objetos] [--silencioso]
+  python main.py --video <path> [--patient-id <id>] [--eicu-data <dir>] [--saida <path>] [--sem-objetos] [--silencioso]
   ```
 - **Dependencies**: `fusion.py`, `argparse`, `json`, `pathlib`
+- **Argumentos**:
+  | Argumento | Padrão | Descrição |
+  |-----------|--------|-----------|
+  | `--video` | obrigatório | Path do MP4 para o módulo de vídeo |
+  | `--patient-id` | `video_001` | ID da sessão de vídeo |
+  | `--eicu-data` | `eicu-anomaly-detection/modulo_anomalias/data/raw/` | Path dos CSVs eICU — permite CI e testes passarem dir alternativo |
+  | `--saida` | `outputs/final_multimodal_report.json` | Path do relatório final |
+  | `--sem-objetos` | False | Desativa YOLOv8 no módulo de vídeo |
+  | `--silencioso` | False | Suprime logs dos módulos |
 - **Fluxo**:
   1. Parse args
-  2. Validar existência do vídeo e dos dados eICU — falhar cedo com mensagem clara
-  3. `ClinicalAdapter().run()` → `alertas_clinicos`
-  4. `VideoAdapter(video, patient_id).run()` → `alertas_video`
+  2. Validar existência do vídeo e do `--eicu-data` dir — falhar cedo com mensagem clara
+  3. `ClinicalAdapter(data_dir=args.eicu_data).run()` → `alertas_clinicos`
+  4. `VideoAdapter(video_path=args.video, patient_id=args.patient_id).run()` → `alertas_video`
   5. `MultimodalFusion().fuse([alertas_clinicos, alertas_video])` → `report`
   6. `outputs/`.mkdir → salvar JSON → imprimir
 
@@ -224,6 +236,8 @@ Os módulos rodam **sequencialmente** (clínico → vídeo). Não há estado com
 | Execução sequencial | Default sem ThreadPoolExecutor | CPU local; paralelismo adiciona complexidade sem ganho real em batch local |
 | `src/fusion.py` → `fusion.py` na raiz | Mover e refatorar | `src/` sozinha na raiz é inconsistente; fusão é o integrador do projeto |
 | Fixtures de teste em `tests/fixtures/` | JSONs estáticos + `test_video.mp4` | CI usa os mesmos dados — sem dados sintéticos separados |
+| Adaptadores recebem paths como parâmetro | `ClinicalAdapter(data_dir=)`, `VideoAdapter(video_path=)` | Desacopla os módulos dos paths hardcoded — testes passam fixtures, CI passa paths configuráveis, sem monkey-patching |
+| Modificar `EICUDataLoader` para aceitar `data_dir` | `data_dir: Path \| None = None` com fallback para `config.DATA_RAW_DIR` | Mínima mudança no módulo clínico; compatibilidade retroativa garantida; habilita flexibilidade nos adaptadores |
 
 ---
 

@@ -101,13 +101,19 @@ Os módulos rodam **sequencialmente** (clínico → vídeo). Não há estado com
 - **Interface**:
   ```python
   class ClinicalAdapter(ModuleAdapter):
-      def __init__(self, data_dir: str | Path | None = None): ...
+      def __init__(
+          self,
+          data_dir: str | Path | None = None,
+          patient_id: str | None = None,   # None = retorna todos os anômalos
+      ): ...
       def run(self) -> list[AlertaNormalizado]: ...
   ```
 - **Dependencies**: `eicu-anomaly-detection/src/` (via `sys.path`)
-- **Reuses**: `train.main()` — executa o pipeline completo e lê o `alerts.json` gerado
+- **Reuses**: `EICUDataLoader`, `ClinicalFeatureBuilder`, `ClinicalAnomalyDetector`, `AlertGenerator`
 - **Normalização**: `alert["sample_id"]` → `module_id`
-- **`data_dir`**: quando `None`, usa o path padrão `eicu-anomaly-detection/modulo_anomalias/data/raw/`. Quando fornecido, passa para `EICUDataLoader(data_dir=data_dir)`. Permite testes locais com fixtures e CI com path configurável.
+- **`data_dir`**: quando `None`, usa o path padrão. Quando fornecido, passa para `EICUDataLoader(data_dir=data_dir)`.
+- **`patient_id`**: quando `None`, retorna todos os alertas anômalos (modo lote). Quando fornecido, filtra os alertas pelo `sample_id == patient_id` **após** a predição em lote. O modelo sempre treina com todos os dados — só o output é filtrado.
+- **Filtro ID inexistente**: se `patient_id` não existe no dataset, retorna `[]` sem erro.
 
 ---
 
@@ -118,12 +124,19 @@ Os módulos rodam **sequencialmente** (clínico → vídeo). Não há estado com
 - **Interface**:
   ```python
   class VideoAdapter(ModuleAdapter):
-      def __init__(self, video_path: str, patient_id: str, sem_objetos: bool = False): ...
+      def __init__(
+          self,
+          video_path: str,
+          patient_id: str = "video_001",   # aparece como module_id no alerta
+          sem_objetos: bool = False,
+          verbose: bool = True,
+      ): ...
       def run(self) -> list[AlertaNormalizado]: ...
   ```
 - **Dependencies**: `modulo_video/src/` (via `sys.path`)
 - **Reuses**: `pipeline.processar_video()` — retorna dict de alerta diretamente
 - **Normalização**: `alert["patient_id"]` → `module_id`
+- **`patient_id`**: sempre obrigatório conceitualmente; default `"video_001"` quando não fornecido pelo CLI.
 
 ---
 
@@ -154,23 +167,25 @@ Os módulos rodam **sequencialmente** (clínico → vídeo). Não há estado com
 - **Location**: `main.py` (raiz)
 - **Interface**:
   ```
-  python main.py --video <path> [--patient-id <id>] [--eicu-data <dir>] [--saida <path>] [--sem-objetos] [--silencioso]
+  python main.py --video <path> [--clinical-patient-id <id>] [--video-patient-id <id>]
+                               [--eicu-data <dir>] [--saida <path>] [--sem-objetos] [--silencioso]
   ```
 - **Dependencies**: `fusion.py`, `argparse`, `json`, `pathlib`
 - **Argumentos**:
   | Argumento | Padrão | Descrição |
   |-----------|--------|-----------|
   | `--video` | obrigatório | Path do MP4 para o módulo de vídeo |
-  | `--patient-id` | `video_001` | ID da sessão de vídeo |
-  | `--eicu-data` | `eicu-anomaly-detection/modulo_anomalias/data/raw/` | Path dos CSVs eICU — permite CI e testes passarem dir alternativo |
+  | `--clinical-patient-id` | `None` (lote) | Filtra alertas clínicos por `patientunitstayid` após predição |
+  | `--video-patient-id` | `"video_001"` | ID que aparece como `module_id` no alerta de vídeo |
+  | `--eicu-data` | `eicu-anomaly-detection/modulo_anomalias/data/raw/` | Path dos CSVs eICU |
   | `--saida` | `outputs/final_multimodal_report.json` | Path do relatório final |
   | `--sem-objetos` | False | Desativa YOLOv8 no módulo de vídeo |
   | `--silencioso` | False | Suprime logs dos módulos |
 - **Fluxo**:
   1. Parse args
   2. Validar existência do vídeo e do `--eicu-data` dir — falhar cedo com mensagem clara
-  3. `ClinicalAdapter(data_dir=args.eicu_data).run()` → `alertas_clinicos`
-  4. `VideoAdapter(video_path=args.video, patient_id=args.patient_id).run()` → `alertas_video`
+  3. `ClinicalAdapter(data_dir=args.eicu_data, patient_id=args.clinical_patient_id).run()` → `alertas_clinicos`
+  4. `VideoAdapter(video_path=args.video, patient_id=args.video_patient_id).run()` → `alertas_video`
   5. `MultimodalFusion().fuse([alertas_clinicos, alertas_video])` → `report`
   6. `outputs/`.mkdir → salvar JSON → imprimir
 

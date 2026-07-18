@@ -327,45 +327,6 @@ def test_clinical_adapter_lista_vazia(tmp_path):
             alertas = adapter.run()
 
     assert alertas == []
-
-
-def test_clinical_adapter_filtro_patient_id(tmp_path):
-    """Com patient_id, retorna apenas alertas daquele paciente."""
-    alerts_path = tmp_path / "outputs"
-    alerts_path.mkdir()
-    dois_alertas = [
-        {**ALERTA_CLINICO_SAMPLE, "sample_id": "141765"},
-        {**ALERTA_CLINICO_SAMPLE, "sample_id": "999999"},
-    ]
-    (alerts_path / "alerts.json").write_text(
-        json.dumps(dois_alertas), encoding="utf-8"
-    )
-
-    adapter = ClinicalAdapter(data_dir=tmp_path / "raw", patient_id="141765")
-
-    with patch.object(adapter, "_executar_pipeline"):
-        with patch.object(adapter, "_alerts_path", alerts_path / "alerts.json"):
-            alertas = adapter.run()
-
-    assert len(alertas) == 1
-    assert alertas[0].module_id == "141765"
-
-
-def test_clinical_adapter_filtro_patient_id_inexistente(tmp_path):
-    """patient_id que não existe no dataset retorna lista vazia sem erro."""
-    alerts_path = tmp_path / "outputs"
-    alerts_path.mkdir()
-    (alerts_path / "alerts.json").write_text(
-        json.dumps([ALERTA_CLINICO_SAMPLE]), encoding="utf-8"
-    )
-
-    adapter = ClinicalAdapter(data_dir=tmp_path / "raw", patient_id="nao_existe")
-
-    with patch.object(adapter, "_executar_pipeline"):
-        with patch.object(adapter, "_alerts_path", alerts_path / "alerts.json"):
-            alertas = adapter.run()
-
-    assert alertas == []
 ```
 
 - [ ] **Step 2: Rodar e verificar que falha**
@@ -385,22 +346,13 @@ class ClinicalAdapter(ModuleAdapter):
 
     data_dir: diretório com os CSVs brutos do eICU. Quando None, usa o path
     padrão do módulo (eicu-anomaly-detection/modulo_anomalias/data/raw/).
-
-    patient_id: quando None, retorna todos os alertas anômalos (modo lote).
-    Quando fornecido, filtra os alertas pelo sample_id após predição em lote.
-    O modelo sempre treina com todos os dados — só o output é filtrado.
     """
 
     _EICU_ROOT = Path(__file__).parent / "eicu-anomaly-detection"
     _OUTPUTS = _EICU_ROOT / "modulo_anomalias" / "outputs"
 
-    def __init__(
-        self,
-        data_dir: str | Path | None = None,
-        patient_id: str | None = None,
-    ):
+    def __init__(self, data_dir: str | Path | None = None):
         self.data_dir = Path(data_dir) if data_dir is not None else None
-        self.patient_id = patient_id
         self._alerts_path = self._OUTPUTS / "alerts.json"
         self._injetar_syspath()
 
@@ -448,10 +400,6 @@ class ClinicalAdapter(ModuleAdapter):
 
         with open(self._alerts_path, encoding="utf-8") as f:
             raw = json.load(f)
-
-        # Filtro por patient_id após predição em lote
-        if self.patient_id is not None:
-            raw = [a for a in raw if str(a["sample_id"]) == str(self.patient_id)]
 
         return [
             AlertaNormalizado(
@@ -861,16 +809,7 @@ def parse_args():
         description="Fusão multimodal — Tech Challenge FIAP Fase 4"
     )
     parser.add_argument("--video", required=True, help="Caminho do vídeo MP4")
-    parser.add_argument(
-        "--clinical-patient-id",
-        default=None,
-        help="Filtra alertas clínicos por patientunitstayid (ausente = modo lote, todos os anômalos)",
-    )
-    parser.add_argument(
-        "--video-patient-id",
-        default="video_001",
-        help="ID da sessão de vídeo (aparece como module_id no alerta)",
-    )
+    parser.add_argument("--patient-id", default="video_001", help="ID da sessão de vídeo")
     parser.add_argument(
         "--eicu-data",
         default=str(_EICU_DATA_DEFAULT),
@@ -917,18 +856,14 @@ def main():
     print("=" * 60)
 
     # Módulo clínico
-    clinical = ClinicalAdapter(
-        data_dir=args.eicu_data,
-        patient_id=args.clinical_patient_id,
-    )
+    clinical = ClinicalAdapter(data_dir=args.eicu_data)
     alertas_clinicos = clinical.run()
-    modo = f"patient_id={args.clinical_patient_id}" if args.clinical_patient_id else "lote"
-    print(f"[Clínico] {len(alertas_clinicos)} alerta(s) gerado(s) ({modo}).")
+    print(f"[Clínico] {len(alertas_clinicos)} alerta(s) gerado(s).")
 
     # Módulo de vídeo
     video = VideoAdapter(
         video_path=args.video,
-        patient_id=args.video_patient_id,
+        patient_id=args.patient_id,
         sem_objetos=args.sem_objetos,
         verbose=not args.silencioso,
     )
@@ -1148,8 +1083,7 @@ O relatório final é salvo em `outputs/final_multimodal_report.json` e impresso
 | Argumento | Padrão | Descrição |
 |-----------|--------|-----------|
 | `--video` | obrigatório | Caminho do vídeo MP4 |
-| `--clinical-patient-id` | — (modo lote) | Filtra alertas clínicos por `patientunitstayid`; ausente = todos os anômalos |
-| `--video-patient-id` | `video_001` | ID da sessão de vídeo (aparece como `module_id` no alerta) |
+| `--patient-id` | `video_001` | ID da sessão de vídeo |
 | `--eicu-data` | `eicu-anomaly-detection/modulo_anomalias/data/raw/` | Diretório com os CSVs eICU |
 | `--saida` | `outputs/final_multimodal_report.json` | Path do relatório final |
 | `--sem-objetos` | — | Desativa YOLOv8 (máquinas sem GPU) |

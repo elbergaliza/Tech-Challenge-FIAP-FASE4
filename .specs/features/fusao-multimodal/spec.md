@@ -45,11 +45,12 @@ Os módulos clínico e de vídeo do Tech Challenge FIAP Fase 4 rodam de forma in
 
 **Acceptance Criteria**:
 
-1. WHEN `python main.py --video <path>` é executado THEN o sistema SHALL rodar o pipeline clínico (eICU Demo) e gerar seus alertas
-2. WHEN o pipeline clínico termina THEN o sistema SHALL rodar o pipeline de vídeo com o arquivo fornecido e gerar seu alerta
-3. WHEN ambos os módulos terminam THEN o sistema SHALL consolidar os alertas em `outputs/final_multimodal_report.json`
-4. WHEN o relatório é gerado THEN o sistema SHALL imprimí-lo formatado no terminal
-5. WHEN um módulo não encontra seus dados de entrada THEN o sistema SHALL exibir mensagem de erro clara e interromper
+1. WHEN `python main.py --video <path>` é executado THEN o sistema SHALL rodar o pipeline clínico em lote (todos os pacientes do eICU) e o pipeline de vídeo
+2. WHEN `--clinical-patient-id <id>` é passado THEN o sistema SHALL filtrar os alertas clínicos apenas para aquele `patientunitstayid` após a predição em lote
+3. WHEN `--video-patient-id <id>` é passado THEN o alerta de vídeo SHALL usar esse ID como `module_id`; quando ausente, usa default `"video_001"`
+4. WHEN ambos os módulos terminam THEN o sistema SHALL consolidar os alertas em `outputs/final_multimodal_report.json`
+5. WHEN o relatório é gerado THEN o sistema SHALL imprimí-lo formatado no terminal
+6. WHEN um módulo não encontra seus dados de entrada THEN o sistema SHALL exibir mensagem de erro clara e interromper
 
 **Independent Test**: `python main.py --video tests/fixtures/test_video.mp4` gera `outputs/final_multimodal_report.json` com campos `resumo` e `alertas`.
 
@@ -129,6 +130,7 @@ Os módulos clínico e de vídeo do Tech Challenge FIAP Fase 4 rodam de forma in
 - WHEN apenas um módulo tem alertas THEN o relatório SHALL conter apenas os alertas desse módulo
 - WHEN o arquivo de vídeo não existe THEN o sistema SHALL exibir `"Arquivo de vídeo não encontrado: <path>"` e encerrar com código de saída 1
 - WHEN os dados do eICU não estão em `data/raw/` THEN o sistema SHALL exibir instrução de download e encerrar com código de saída 1
+- WHEN `--clinical-patient-id` é passado mas não existe no eICU THEN `alertas` SHALL conter 0 alertas clínicos e o relatório SHALL continuar válido
 - WHEN todos os scores são iguais THEN `score_medio` e `nivel_mais_critico` SHALL ser consistentes entre si
 - WHEN `outputs/` não existe THEN o sistema SHALL criá-la antes de salvar o relatório
 
@@ -143,6 +145,8 @@ Os módulos clínico e de vídeo do Tech Challenge FIAP Fase 4 rodam de forma in
 | FUS-03 | P1: Execução end-to-end — relatório gerado | Design | Pending |
 | FUS-04 | P1: Execução end-to-end — imprime no terminal | Design | Pending |
 | FUS-05 | P1: Execução end-to-end — erro claro se dados ausentes | Design | Pending |
+| FUS-20 | P1: CLI — --clinical-patient-id filtra alertas pós-predição | Design | Pending |
+| FUS-21 | P1: CLI — --video-patient-id define module_id do alerta de vídeo | Design | Pending |
 | FUS-06 | P1: Relatório correto — score_medio = média | Design | Pending |
 | FUS-07 | P1: Relatório correto — nivel_mais_critico = pior alerta | Design | Pending |
 | FUS-08 | P1: Relatório correto — recomendacao_geral baseada no pior | Design | Pending |

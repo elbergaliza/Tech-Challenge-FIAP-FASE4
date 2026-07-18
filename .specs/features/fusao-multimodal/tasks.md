@@ -95,19 +95,22 @@ T1 ──► T2 ──► T2b ──┬──► T3 [P] ──┐
 
 ### T3: Implementar `ClinicalAdapter` [P]
 
-**What**: Criar `ClinicalAdapter(ModuleAdapter)` que injeta `eicu-anomaly-detection/src` no `sys.path`, executa o pipeline clínico passando `data_dir` ao `EICUDataLoader`, e retorna `list[AlertaNormalizado]` com `sample_id` normalizado para `module_id`.
+**What**: Criar `ClinicalAdapter(ModuleAdapter)` que injeta `eicu-anomaly-detection/src` no `sys.path`, executa o pipeline clínico em lote, filtra alertas por `patient_id` se fornecido, e retorna `list[AlertaNormalizado]` com `sample_id` normalizado para `module_id`.
 **Where**: `fusion.py`
 **Depends on**: T2, T2b
 **Reuses**: `eicu-anomaly-detection/src/train.py`, `EICUDataLoader`
-**Requirement**: FUS-01, FUS-10
+**Requirement**: FUS-01, FUS-10, FUS-20
 
 **Done when**:
-- [ ] `ClinicalAdapter(data_dir=None)` implementa `ModuleAdapter`
-- [ ] `__init__` aceita `data_dir: str | Path | None = None`
+- [ ] `ClinicalAdapter(data_dir=None, patient_id=None)` implementa `ModuleAdapter`
+- [ ] `__init__` aceita `data_dir: str | Path | None = None` e `patient_id: str | None = None`
 - [ ] `sys.path` injeta `eicu-anomaly-detection/` e `eicu-anomaly-detection/src/` antes do import
-- [ ] Pipeline clínico roda passando `data_dir` ao `EICUDataLoader`
+- [ ] Pipeline clínico sempre treina em lote (todos os pacientes)
+- [ ] Quando `patient_id=None`, retorna todos os alertas anômalos
+- [ ] Quando `patient_id="141765"`, filtra alertas onde `sample_id == "141765"` após predição
+- [ ] Quando `patient_id` não existe no dataset, retorna `[]` sem erro
 - [ ] `sample_id` de cada alerta é mapeado para `module_id` no `AlertaNormalizado`
-- [ ] Testes unitários cobrem: normalização de `sample_id`, `data_dir` alternativo, lista vazia
+- [ ] Testes unitários cobrem: sem filtro (lote), com filtro válido, com filtro inexistente, lista vazia
 
 **Tests**: unit
 **Gate**: `pytest tests/test_fusion.py -k "clinical"` passa
@@ -172,7 +175,9 @@ T1 ──► T2 ──► T2b ──┬──► T3 [P] ──┐
 **Requirement**: FUS-01, FUS-03, FUS-04, FUS-05, FUS-17, FUS-18, FUS-19
 
 **Done when**:
-- [ ] `main.py` aceita `--video`, `--patient-id`, `--eicu-data`, `--saida`, `--sem-objetos`, `--silencioso`
+- [ ] `main.py` aceita `--video`, `--clinical-patient-id`, `--video-patient-id`, `--eicu-data`, `--saida`, `--sem-objetos`, `--silencioso`
+- [ ] `--clinical-patient-id` é opcional (default `None` = modo lote)
+- [ ] `--video-patient-id` é opcional (default `"video_001"`)
 - [ ] `--eicu-data` tem default `eicu-anomaly-detection/modulo_anomalias/data/raw/`
 - [ ] Valida existência do vídeo antes de chamar adaptadores — `sys.exit(1)` com mensagem
 - [ ] Valida existência do `--eicu-data` dir — `sys.exit(1)` com instrução de download

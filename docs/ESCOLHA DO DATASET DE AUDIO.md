@@ -66,7 +66,7 @@ O plano divide em duas camadas:
 
 ### 1. Áudio já pronto, sem YouTube
 
-O AudioSet **não distribui WAV direto**. Você recebe CSV com `youtube_id`, `start_time`, `end_time` e rótulos. Para usar no `audio_pipeline`, é preciso:
+O AudioSet **não distribui WAV direto**. Você recebe CSV com `youtube_id`, `start_time`, `end_time` e rótulos. Para usar no `src/audio/audio_pipeline.py`, é preciso:
 
 - baixar vídeos do YouTube;
 - recortar clipes de 10 s;
@@ -141,7 +141,7 @@ flowchart TD
         M[metadata.json por participante]
     end
 
-    subgraph pipeline [audio_pipeline.py]
+    subgraph pipeline ["src/audio/audio_pipeline.py"]
         B1[MoviePy / pydub - normalizar WAV]
         B2[Azure Speech to Text - fala/contagem]
         B3[Azure Text Analytics - termos + sentimento]
@@ -180,5 +180,5 @@ flowchart TD
 
 O Coswara é a escolha certa para a base de áudio. O ponto de atenção real não é Coswara vs AudioSet, e sim **complementar com áudio em português** para a demo obrigatória do Azure Speech + Text Analytics — porque o Coswara é forte em sinais respiratórios, mas fraco em consultas clínicas em `pt-BR`.
 
-Se quiser, no próximo passo posso montar um **roteiro de subconjunto do Coswara** (quais pastas baixar, estrutura em `data/raw/` e mapeamento direto para o `audio_pipeline.py`).
+Se quiser, no próximo passo posso montar um **roteiro de subconjunto do Coswara** (quais pastas baixar, estrutura em `data/raw/` e mapeamento direto para o `src/audio/audio_pipeline.py`).
 

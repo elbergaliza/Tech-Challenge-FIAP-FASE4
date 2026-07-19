@@ -142,18 +142,27 @@ Toda a seção é **extensão necessária (não coberta na matéria)** — o cur
 ```
 tech-challenge-fase4/
 ├── src/
-│   ├── video_pipeline.py     # pose/expressão/identidade em vídeo
-│   ├── audio_pipeline.py     # extração + transcrição + análise vocal
-│   ├── text_pipeline.py      # Textract + Comprehend + sumarização
-│   ├── anomaly.py            # séries vitais + prescrições + movimentação
-│   ├── alerts.py             # regras de severidade + notificação
+│   ├── audio/                # módulo audio_texto (feature atual)
+│   │   ├── audio_pipeline.py # orquestração + API pública
+│   │   ├── audio_cli.py
+│   │   ├── audio_schemas.py
+│   │   ├── audio_azure.py
+│   │   ├── audio_acoustics.py
+│   │   ├── audio_scoring.py
+│   │   └── audio_storage.py
+│   ├── video_pipeline.py     # pose/expressão/identidade em vídeo (futuro)
+│   ├── text_pipeline.py      # Textract + Comprehend + sumarização (futuro)
+│   ├── anomaly.py            # séries vitais + prescrições + movimentação (futuro)
+│   ├── alerts.py             # regras de severidade + notificação (futuro)
 │   └── fusion.py             # consolidação multimodal de eventos
-├── tests/                    # testes unitários por pipeline
+├── tests/
+│   └── audio/                # unit / contract / integration do módulo de áudio
 ├── docs/                     # relatório técnico, diagramas, prints
 ├── data/
 │   ├── raw/                  # vídeos, áudios, PDFs, csv de sinais vitais
-│   ├── processed/            # transcrições, texto_extraido, métricas
-│   └── reports/              # relatórios .docx/.json gerados
+│   └── audio/
+│       ├── processed/        # transcrições/metadados do módulo de áudio
+│       └── reports/          # alertas JSON do módulo de áudio
 ├── requirements.txt          # (ou pyproject.toml com uv)
 └── README.md
 ```
@@ -218,7 +227,7 @@ def main(path):
     save_report(events, "data/reports/video.json")
 ```
 
-`src/audio_pipeline.py`
+`src/audio/audio_pipeline.py`
 
 ```python
 import moviepy.editor as mp
@@ -247,10 +256,10 @@ def detect_critical_terms(text, ta_key, ta_endpoint):
 def save_report(data, path): ...
 
 def main(video_path, speech_key, speech_region, ta_key, ta_endpoint):
-    wav = load_audio_from_video(video_path, "data/processed/a.wav")
+    wav = load_audio_from_video(video_path, "data/audio/processed/a.wav")
     text = process_transcription(wav, speech_key, speech_region)
     insights = detect_critical_terms(text, ta_key, ta_endpoint)
-    save_report({"transcricao": text, **insights}, "data/reports/audio.json")
+    save_report({"transcricao": text, **insights}, "data/audio/reports/audio.json")
 ```
 
 `src/text_pipeline.py`

@@ -20,7 +20,7 @@ Processar uma unica gravacao local e retornar o alerta padronizado do modulo `au
 
 ## Input contract
 
-`request` deve seguir `contracts/audio/audio-input.schema.json` e ser validado por Pydantic v2.
+`request` deve seguir `contracts/audio-input.schema.json` e ser validado por Pydantic v2.
 
 Regras obrigatorias:
 
@@ -32,7 +32,7 @@ Regras obrigatorias:
 
 ## Output contract
 
-Retorna `AudioAlert`, validado por Pydantic v2 e serializavel conforme `contracts/audio/audio-alert.schema.json`.
+Retorna `AudioAlert`, validado por Pydantic v2 e serializavel conforme `contracts/audio-alert.schema.json`.
 
 Invariantes obrigatorias:
 

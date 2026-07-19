@@ -42,7 +42,7 @@ Em sucesso:
 - Imprime somente o caminho do relatorio e um status resumido.
 - Nao imprime audio, transcricao, termos criticos nem credenciais.
 
-Formato do JSON: `contracts/audio/audio-alert.schema.json`.
+Formato do JSON: `contracts/audio-alert.schema.json`.
 
 Em erro de entrada:
 

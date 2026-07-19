@@ -80,7 +80,7 @@ alert = process_audio_recording(request)
 print(alert.model_dump_json())
 ```
 
-`alert` deve validar contra `specs/001-audio-texto-pipeline/contracts/audio/audio-alert.schema.json`.
+`alert` deve validar contra `specs/001-audio-texto-pipeline/contracts/audio-alert.schema.json`.
 
 ## 6. Validar qualidade
 

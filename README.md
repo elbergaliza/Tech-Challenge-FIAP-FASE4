@@ -16,7 +16,7 @@ O projeto propõe um sistema multimodal de monitoramento preventivo de pacientes
 O módulo está localizado na pasta:
 
 ```text
-modulo_anomalias/
+eicu-anomaly-detection/
 ```
 
 Ele corresponde à parte de **detecção de anomalias clínicas** do Tech Challenge.
@@ -43,61 +43,22 @@ Detectar possíveis anomalias clínicas em pacientes de UTI a partir de dados es
 ## Estrutura do módulo
 
 ```text
-Tech-Challenge-FIAP-FASE4/
-│
-├── adapters/                     # Adaptadores para fusão multimodal
-│   ├── base.py
-│   ├── clinical/                 # Adapter do módulo eICU
-│   ├── video/                    # Adapter do módulo de vídeo
-│   └── audio/                    # Adapter stub (futuro módulo de áudio)
-│
-├── eicu-anomaly-detection/       # Módulo clínico (eICU)
-│   ├── src/                      # Pacote Python eicu_anomaly_detection
-│   │   ├── __init__.py
-│   │   ├── config.py
-│   │   ├── data_loader.py
-│   │   ├── feature_builder.py
-│   │   ├── anomaly_detector.py
-│   │   ├── alert_generator.py
-│   │   ├── train.py
-│   │   └── test_output.py
-│   └── modulo_anomalias/
-│       ├── data/
-│       │   ├── raw/
-│       │   └── processed/
-│       ├── models/
-│       └── outputs/
-│
-├── fusion/                       # Motor de fusão multimodal
-│   ├── core/
-│   │   ├── fusion.py
-│   │   └── schema.py
-│   └── io.py
-│
-├── modulo_video/                 # Módulo de vídeo/fisioterapia
-│   └── src/                      # Pacote Python modulo_video
-│       ├── __init__.py
-│       ├── config.py
-│       ├── pipeline.py
-│       ├── pose_extractor.py
-│       ├── biomechanics.py
-│       ├── object_detector.py
-│       ├── anomaly_detector.py
-│       ├── risk_scoring.py
-│       └── report.py
-│
-├── main.py                       # CLI de orquestração
-├── tests/                        # Testes unitários e E2E
-│   ├── fixtures/
-│   │   ├── mock_eicu/
-│   │   └── test_video.mp4
-│   ├── fusion/
-│   └── test_e2e_mock.py
-│
-├── .gitignore
-├── LICENSE
-├── README.md
-└── requirements.txt
+eicu-anomaly-detection/
+├── src/                          # Pacote Python eicu_anomaly_detection
+│   ├── __init__.py
+│   ├── config.py
+│   ├── data_loader.py
+│   ├── feature_builder.py
+│   ├── anomaly_detector.py
+│   ├── alert_generator.py
+│   ├── train.py
+│   └── test_output.py
+└── modulo_anomalias/
+    ├── data/
+    │   ├── raw/
+    │   └── processed/
+    ├── models/
+    └── outputs/
 ```
 
 ---
@@ -468,17 +429,33 @@ adapters de cada módulo e consolida os alertas em um único relatório JSON.
 
 ```text
 Tech-Challenge-FIAP-FASE4/
-├── adapters/
-│   ├── clinical/          # adapter do módulo eICU
-│   ├── video/             # adapter do módulo de vídeo
-│   └── audio/             # adapter stub (futuro módulo de áudio)
-├── fusion/
-│   └── core/              # schema unificado + motor de fusão
-├── main.py                # CLI de orquestração
-├── tests/
-│   └── fixtures/          # dados mockados para E2E
-└── outputs/
-    └── final_multimodal_report.json
+├── adapters/                     # Adaptadores para fusão multimodal
+│   ├── base.py
+│   ├── clinical/                 # Adapter do módulo eICU
+│   ├── video/                    # Adapter do módulo de vídeo
+│   └── audio/                    # Adapter stub (futuro módulo de áudio)
+│
+├── eicu-anomaly-detection/       # Módulo clínico (eICU)
+│   ├── src/                      # Pacote Python eicu_anomaly_detection
+│   └── modulo_anomalias/         # Dados, modelos e outputs do módulo
+│
+├── modulo_video/                 # Módulo de vídeo/fisioterapia
+│   └── src/                      # Pacote Python modulo_video
+│
+├── fusion/                       # Motor de fusão multimodal
+│   ├── core/
+│   │   ├── fusion.py
+│   │   └── schema.py
+│   └── io.py
+│
+├── tests/                        # Testes unitários e E2E
+│   ├── fixtures/
+│   ├── fusion/
+│   └── test_e2e_mock.py
+│
+├── main.py                       # CLI de orquestração
+├── outputs/                      # Relatório final gerado
+└── requirements.txt
 ```
 
 ## Como executar

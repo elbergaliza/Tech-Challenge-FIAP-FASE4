@@ -52,20 +52,21 @@ Tech-Challenge-FIAP-FASE4/
 │   └── audio/                    # Adapter stub (futuro módulo de áudio)
 │
 ├── eicu-anomaly-detection/       # Módulo clínico (eICU)
+│   ├── src/                      # Pacote Python eicu_anomaly_detection
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── data_loader.py
+│   │   ├── feature_builder.py
+│   │   ├── anomaly_detector.py
+│   │   ├── alert_generator.py
+│   │   ├── train.py
+│   │   └── test_output.py
 │   └── modulo_anomalias/
 │       ├── data/
 │       │   ├── raw/
 │       │   └── processed/
 │       ├── models/
-│       ├── outputs/
-│       └── src/
-│           ├── config.py
-│           ├── data_loader.py
-│           ├── feature_builder.py
-│           ├── anomaly_detector.py
-│           ├── alert_generator.py
-│           ├── train.py
-│           └── test_output.py
+│       └── outputs/
 │
 ├── fusion/                       # Motor de fusão multimodal
 │   ├── core/
@@ -74,16 +75,16 @@ Tech-Challenge-FIAP-FASE4/
 │   └── io.py
 │
 ├── modulo_video/                 # Módulo de vídeo/fisioterapia
-│   ├── src/
-│   │   ├── pipeline.py
-│   │   ├── pose_extractor.py
-│   │   ├── biomechanics.py
-│   │   ├── anomaly_detector.py
-│   │   ├── risk_scoring.py
-│   │   └── report.py
-│   ├── config.py
-│   └── data/
-│       └── entrada/
+│   └── src/                      # Pacote Python modulo_video
+│       ├── __init__.py
+│       ├── config.py
+│       ├── pipeline.py
+│       ├── pose_extractor.py
+│       ├── biomechanics.py
+│       ├── object_detector.py
+│       ├── anomaly_detector.py
+│       ├── risk_scoring.py
+│       └── report.py
 │
 ├── main.py                       # CLI de orquestração
 ├── tests/                        # Testes unitários e E2E

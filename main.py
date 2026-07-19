@@ -115,6 +115,11 @@ def main(argv: list[str] | None = None) -> int:
         print("=" * 60)
         print()
 
+    print(f"[main] Dados eICU: {eicu_data_dir}")
+    print(f"[main] Vídeo: {video_path}")
+    print(f"[main] Clinical patient id: {args.clinical_patient_id}")
+    print(f"[main] Video patient id: {args.video_patient_id}")
+
     fusion = MultimodalFusion()
     fusion.register(
         ClinicalAdapter(

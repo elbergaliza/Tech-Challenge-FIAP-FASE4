@@ -1,5 +1,30 @@
-pandas
-numpy
-scikit-learn
-matplotlib
-joblib
+# Dependências unificadas para rodar a fusão multimodal com dados mockados.
+# 
+# Recomenda-se Python 3.12 para compatibilidade com MediaPipe.
+# 
+# Uso:
+#   python -m venv .venv312
+#   source .venv312/bin/activate  # Linux/macOS
+#   .venv312\Scripts\activate     # Windows
+#   pip install -r requirements.txt
+#
+# Após instalar, gere as fixtures mockadas:
+#   python tests/fixtures/generate_fixtures.py
+#
+# E rode a pipeline:
+#   python main.py --video tests/fixtures/test_video.mp4 --eicu-data tests/fixtures/mock_eicu --video-patient-id local_test
+
+# Módulo clínico (eicu-anomaly-detection)
+pandas>=2.2.0
+numpy>=1.26.0,<2.0.0
+scikit-learn>=1.5.0
+joblib>=1.4.0
+matplotlib>=3.8.0
+
+# Módulo de vídeo (modulo_video)
+mediapipe>=0.10.14,<0.11.0
+opencv-python>=4.10.0,<5.0.0
+ultralytics>=8.2.0,<9.0.0
+
+# Testes
+pytest>=8.0.0

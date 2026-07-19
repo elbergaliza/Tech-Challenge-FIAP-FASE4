@@ -224,6 +224,7 @@ __pycache__/
 *.pyd
 .Python
 .venv/
+.venv312/
 venv/
 env/
 
@@ -240,6 +241,12 @@ Thumbs.db
 **/data/processed/*
 **/models/*
 **/outputs/*
+
+# Modelos baixados automaticamente
+*.pt
+*.pth
+*.onnx
+*.tflite
 
 # Mantém estrutura de pastas
 !**/data/raw/.gitkeep

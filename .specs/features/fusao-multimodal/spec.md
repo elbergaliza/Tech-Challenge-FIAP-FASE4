@@ -140,27 +140,27 @@ Os módulos clínico e de vídeo do Tech Challenge FIAP Fase 4 rodam de forma in
 
 | ID | Story | Fase | Status |
 |----|-------|------|--------|
-| FUS-01 | P1: Execução end-to-end — pipeline clínico roda | Design | Pending |
-| FUS-02 | P1: Execução end-to-end — pipeline vídeo roda | Design | Pending |
-| FUS-03 | P1: Execução end-to-end — relatório gerado | Design | Pending |
-| FUS-04 | P1: Execução end-to-end — imprime no terminal | Design | Pending |
-| FUS-05 | P1: Execução end-to-end — erro claro se dados ausentes | Design | Pending |
-| FUS-20 | P1: CLI — --clinical-patient-id filtra alertas pós-predição | Design | Pending |
-| FUS-21 | P1: CLI — --video-patient-id define module_id do alerta de vídeo | Design | Pending |
-| FUS-06 | P1: Relatório correto — score_medio = média | Design | Pending |
-| FUS-07 | P1: Relatório correto — nivel_mais_critico = pior alerta | Design | Pending |
-| FUS-08 | P1: Relatório correto — recomendacao_geral baseada no pior | Design | Pending |
-| FUS-09 | P1: Relatório correto — lista de alertas individuais | Design | Pending |
-| FUS-10 | P1: Relatório correto — normalização sample_id → module_id | Design | Pending |
-| FUS-11 | P1: Relatório correto — normalização patient_id → module_id | Design | Pending |
-| FUS-12 | P2: Extensibilidade — interface ModuleAdapter | Design | Pending |
-| FUS-13 | P2: Extensibilidade — registro sem mudança no core | Design | Pending |
-| FUS-14 | P2: CI — workflow dispara em push/PR | Design | Pending |
-| FUS-15 | P2: CI — baixa eICU Demo via secrets | Design | Pending |
-| FUS-16 | P2: CI — valida estrutura do JSON gerado | Design | Pending |
-| FUS-17 | P3: Testes unitários — pytest passa | Design | Pending |
-| FUS-18 | P3: Testes unitários — score_medio correto | Design | Pending |
-| FUS-19 | P3: Testes unitários — nivel_mais_critico correto | Design | Pending |
+| FUS-01 | P1: Execução end-to-end — pipeline clínico roda | Design | Done |
+| FUS-02 | P1: Execução end-to-end — pipeline vídeo roda | Design | Done |
+| FUS-03 | P1: Execução end-to-end — relatório gerado | Design | Done |
+| FUS-04 | P1: Execução end-to-end — imprime no terminal | Design | Done |
+| FUS-05 | P1: Execução end-to-end — erro claro se dados ausentes | Design | Done |
+| FUS-20 | P1: CLI — --clinical-patient-id filtra alertas pós-predição | Design | Done |
+| FUS-21 | P1: CLI — --video-patient-id define module_id do alerta de vídeo | Design | Done |
+| FUS-06 | P1: Relatório correto — score_medio = média | Design | Done |
+| FUS-07 | P1: Relatório correto — nivel_mais_critico = pior alerta | Design | Done |
+| FUS-08 | P1: Relatório correto — recomendacao_geral baseada no pior | Design | Done |
+| FUS-09 | P1: Relatório correto — lista de alertas individuais | Design | Done |
+| FUS-10 | P1: Relatório correto — normalização sample_id → module_id | Design | Done |
+| FUS-11 | P1: Relatório correto — normalização patient_id → module_id | Design | Done |
+| FUS-12 | P2: Extensibilidade — interface ModuleAdapter | Design | Done |
+| FUS-13 | P2: Extensibilidade — registro sem mudança no core | Design | Done |
+| FUS-14 | P2: CI — workflow dispara em push/PR | Design | Done |
+| FUS-15 | P2: CI — baixa eICU Demo via secrets | Design | Won't do (usamos fixtures mockadas) |
+| FUS-16 | P2: CI — valida estrutura do JSON gerado | Design | Done |
+| FUS-17 | P3: Testes unitários — pytest passa | Design | Done |
+| FUS-18 | P3: Testes unitários — score_medio correto | Design | Done |
+| FUS-19 | P3: Testes unitários — nivel_mais_critico correto | Design | Done |
 
 ---
 

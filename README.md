@@ -15,6 +15,8 @@ O projeto propõe um sistema multimodal de monitoramento preventivo de pacientes
 
 Todos os comandos abaixo devem ser executados a partir da raiz do repositório.
 
+> **Preferiu o Google Colab?** Use o notebook `notebooks/TechChallenge_Colab_Completo.ipynb` para executar todo o fluxo com dados reais do eICU Demo. Veja a seção [Execução no Google Colab](#execução-no-google-colab) logo abaixo.
+
 ## 1. Criar e ativar o ambiente virtual
 
 ```bash
@@ -128,6 +130,38 @@ pytest tests/ -v
 ```
 
 > Os testes unitários não dependem das fixtures binárias. O teste E2E (`tests/test_e2e_mock.py`) gera as fixtures automaticamente na primeira execução, mas você pode gerá-las manualmente antes com `python tests/fixtures/generate_fixtures.py`.
+
+---
+
+# Execução no Google Colab
+
+O jeito mais simples de executar o projeto com dados reais é usar o notebook `notebooks/TechChallenge_Colab_Completo.ipynb`.
+
+## Passo a passo
+
+1. **Abra o notebook no Colab**
+   - Faça upload de `notebooks/TechChallenge_Colab_Completo.ipynb` no Google Colab, ou
+   - Abra a partir da URL pública do repositório.
+
+2. **Execute as células em ordem**
+   1. **Clone e instalação**: faz `git clone`, instala as dependências e registra os pacotes editáveis com `pip install -e .`.
+   2. **Dados reais do eICU Demo**: baixa automaticamente os arquivos `vitalPeriodic.csv.gz`, `lab.csv.gz` e `medication.csv.gz` do eICU Demo (PhysioNet).
+   3. **Vídeo**: gera um vídeo de teste com OpenCV. Opcionalmente, você pode fazer upload de um vídeo próprio para `modulo_video/data/exemplos/` e ajustar o caminho na célula.
+   4. **Fusão multimodal**: executa `main.py` usando os dados reais do eICU e o vídeo selecionado.
+   5. **Relatório final**: exibe o JSON `outputs/final_multimodal_report.json` com os alertas unificados.
+
+## Testar uma branch específica
+
+Para testar alterações em desenvolvimento, defina a branch antes da primeira célula:
+
+```python
+import os
+os.environ['NOTEBOOK_BRANCH'] = 'feat/fusao-multimodal'
+```
+
+O valor padrão é `main`.
+
+> Atenção: o download do eICU Demo pode demorar alguns minutos. Os arquivos são públicos e não exigem login.
 
 ---
 
@@ -334,35 +368,7 @@ sistema central de monitoramento preventivo.
 
 ---
 
-# Execução no Google Colab
 
-O jeito mais simples de executar o projeto com dados reais é usar o notebook `notebooks/TechChallenge_Colab_Completo.ipynb`.
-
-## Passo a passo
-
-1. **Abra o notebook no Colab**
-   - Faça upload de `notebooks/TechChallenge_Colab_Completo.ipynb` no Google Colab, ou
-   - Abra a partir da URL pública do repositório.
-
-2. **Execute as células em ordem**
-   1. **Clone e instalação**: faz `git clone`, instala as dependências e registra os pacotes editáveis com `pip install -e .`.
-   2. **Dados reais do eICU Demo**: baixa automaticamente os arquivos `vitalPeriodic.csv.gz`, `lab.csv.gz` e `medication.csv.gz` do eICU Demo (PhysioNet).
-   3. **Vídeo**: gera um vídeo de teste com OpenCV. Opcionalmente, você pode fazer upload de um vídeo próprio para `modulo_video/data/exemplos/` e ajustar o caminho na célula.
-   4. **Fusão multimodal**: executa `main.py` usando os dados reais do eICU e o vídeo selecionado.
-   5. **Relatório final**: exibe o JSON `outputs/final_multimodal_report.json` com os alertas unificados.
-
-## Testar uma branch específica
-
-Para testar alterações em desenvolvimento, defina a branch antes da primeira célula:
-
-```python
-import os
-os.environ['NOTEBOOK_BRANCH'] = 'feat/fusao-multimodal'
-```
-
-O valor padrão é `main`.
-
-> Atenção: o download do eICU Demo pode demorar alguns minutos. Os arquivos são públicos e não exigem login.
 
 ---
 

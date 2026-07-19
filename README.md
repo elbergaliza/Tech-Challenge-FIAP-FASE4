@@ -546,8 +546,8 @@ eicu-anomaly-detection/modulo_anomalias/data/raw/
 ### 2. Instalar as dependências
 
 ```bash
-python -m venv .venv312
-source .venv312/bin/activate  # Windows: .venv312\Scripts\activate
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 pip install -e .
 ```

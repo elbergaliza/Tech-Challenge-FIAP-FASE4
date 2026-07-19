@@ -24,7 +24,7 @@ def _alerta_df(alerts: list[dict]) -> pd.DataFrame:
 
 
 def test_clinical_adapter_normaliza_sample_id_para_module_id():
-    from adapters.clinical.adapter import ClinicalAdapter
+    from fusion.adapters.clinical.adapter import ClinicalAdapter
 
     adapter = ClinicalAdapter()
     df = _alerta_df([{"sample_id": "141765"}])
@@ -35,7 +35,7 @@ def test_clinical_adapter_normaliza_sample_id_para_module_id():
 
 
 def test_clinical_adapter_filtra_por_patient_id():
-    from adapters.clinical.adapter import ClinicalAdapter
+    from fusion.adapters.clinical.adapter import ClinicalAdapter
 
     adapter = ClinicalAdapter(patient_id="141765")
     df = _alerta_df([
@@ -50,7 +50,7 @@ def test_clinical_adapter_filtra_por_patient_id():
 
 
 def test_clinical_adapter_patient_id_inexistente_retorna_vazio():
-    from adapters.clinical.adapter import ClinicalAdapter
+    from fusion.adapters.clinical.adapter import ClinicalAdapter
 
     adapter = ClinicalAdapter(patient_id="nao_existe")
     df = _alerta_df([
@@ -63,7 +63,7 @@ def test_clinical_adapter_patient_id_inexistente_retorna_vazio():
 
 
 def test_video_adapter_normaliza_patient_id_para_module_id(tmp_path):
-    from adapters.video.adapter import VideoAdapter
+    from fusion.adapters.video.adapter import VideoAdapter
 
     adapter = VideoAdapter(video_path=str(tmp_path / "fake.mp4"), patient_id="paciente_001")
     alerta_video = {
@@ -83,7 +83,7 @@ def test_video_adapter_normaliza_patient_id_para_module_id(tmp_path):
 
 
 def test_video_adapter_arquivo_nao_encontrado(tmp_path):
-    from adapters.video.adapter import VideoAdapter
+    from fusion.adapters.video.adapter import VideoAdapter
 
     adapter = VideoAdapter(video_path=str(tmp_path / "inexistente.mp4"))
 
@@ -92,7 +92,7 @@ def test_video_adapter_arquivo_nao_encontrado(tmp_path):
 
 
 def test_audio_adapter_stub_retorna_vazio():
-    from adapters.audio.adapter import AudioAdapter
+    from fusion.adapters.audio.adapter import AudioAdapter
 
     adapter = AudioAdapter()
 
@@ -100,7 +100,7 @@ def test_audio_adapter_stub_retorna_vazio():
 
 
 def test_module_adapter_interface():
-    from adapters.base import ModuleAdapter
+    from fusion.adapters.base import ModuleAdapter
     from fusion.core.schema import AlertaNormalizado
 
     class DummyAdapter(ModuleAdapter):

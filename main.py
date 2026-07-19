@@ -30,9 +30,9 @@ import json
 import sys
 from pathlib import Path
 
-from adapters.audio.adapter import AudioAdapter
-from adapters.clinical.adapter import ClinicalAdapter
-from adapters.video.adapter import VideoAdapter
+from fusion.adapters.audio.adapter import AudioAdapter
+from fusion.adapters.clinical.adapter import ClinicalAdapter
+from fusion.adapters.video.adapter import VideoAdapter
 from fusion.core.fusion import MultimodalFusion
 from fusion.io import salvar_relatorio
 

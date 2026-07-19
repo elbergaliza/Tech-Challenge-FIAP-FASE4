@@ -29,7 +29,7 @@ from generate_fixtures import main as generate_fixtures_main  # noqa: E402
 @pytest.fixture(scope="session")
 def fixtures() -> dict[str, Path]:
     """Gera fixtures mockadas uma vez por sessão de teste."""
-    generate_fixtures_main(["--skip-video"])
+    generate_fixtures_main([])
     return {
         "eicu_dir": FIXTURES_DIR / "mock_eicu",
         "video": FIXTURES_DIR / "test_video.mp4",

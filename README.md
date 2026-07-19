@@ -429,12 +429,6 @@ adapters de cada módulo e consolida os alertas em um único relatório JSON.
 
 ```text
 Tech-Challenge-FIAP-FASE4/
-├── adapters/                     # Adaptadores para fusão multimodal
-│   ├── base.py
-│   ├── clinical/                 # Adapter do módulo eICU
-│   ├── video/                    # Adapter do módulo de vídeo
-│   └── audio/                    # Adapter stub (futuro módulo de áudio)
-│
 ├── eicu-anomaly-detection/       # Módulo clínico (eICU)
 │   ├── src/                      # Pacote Python eicu_anomaly_detection
 │   └── modulo_anomalias/         # Dados, modelos e outputs do módulo
@@ -443,6 +437,11 @@ Tech-Challenge-FIAP-FASE4/
 │   └── src/                      # Pacote Python modulo_video
 │
 ├── fusion/                       # Motor de fusão multimodal
+│   ├── adapters/                 # Adaptadores para os módulos externos
+│   │   ├── base.py
+│   │   ├── clinical/             # Adapter do módulo eICU
+│   │   ├── video/                # Adapter do módulo de vídeo
+│   │   └── audio/                # Adapter stub (futuro módulo de áudio)
 │   ├── core/
 │   │   ├── fusion.py
 │   │   └── schema.py
@@ -492,7 +491,7 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-> O projeto foi validado com Python 3.12. O `requirements.txt` unificado cobre o módulo clínico, o módulo de vídeo e os testes. O `pip install -e .` registra os pacotes internos (`eicu_anomaly_detection`, `modulo_video`, `adapters`, `fusion`) como editáveis.
+> O projeto foi validado com Python 3.12. O `requirements.txt` unificado cobre o módulo clínico, o módulo de vídeo e os testes. O `pip install -e .` registra os pacotes internos (`eicu_anomaly_detection`, `modulo_video`, `fusion`) como editáveis.
 
 ### 3. Obter os dados
 

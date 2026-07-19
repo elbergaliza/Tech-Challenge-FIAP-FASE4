@@ -12,7 +12,7 @@ from typing import Any
 
 from modulo_video.pipeline import processar_video
 
-from adapters.base import ModuleAdapter
+from fusion.adapters.base import ModuleAdapter
 from fusion.core.schema import AlertaNormalizado, classificar_nivel
 
 

@@ -19,7 +19,7 @@ from eicu_anomaly_detection.anomaly_detector import ClinicalAnomalyDetector
 from eicu_anomaly_detection.data_loader import EICUDataLoader
 from eicu_anomaly_detection.feature_builder import ClinicalFeatureBuilder
 
-from adapters.base import ModuleAdapter
+from fusion.adapters.base import ModuleAdapter
 from fusion.core.schema import AlertaNormalizado, classificar_nivel
 
 

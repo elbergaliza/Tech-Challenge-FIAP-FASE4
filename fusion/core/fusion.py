@@ -13,7 +13,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from adapters.base import ModuleAdapter
+from fusion.adapters.base import ModuleAdapter
 from fusion.core.schema import AlertaNormalizado, classificar_nivel, recomendacao_por_nivel
 
 

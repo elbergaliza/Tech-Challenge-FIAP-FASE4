@@ -11,36 +11,133 @@ O projeto propõe um sistema multimodal de monitoramento preventivo de pacientes
 
 ---
 
-# Módulo de Detecção de Anomalias Clínicas em UTI
+# Execução local (fluxo completo)
 
-O módulo está localizado na pasta:
+Todos os comandos abaixo devem ser executados a partir da raiz do repositório.
 
-```text
-eicu-anomaly-detection/
+## 1. Criar e ativar o ambiente virtual
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 ```
 
-Ele corresponde à parte de **detecção de anomalias clínicas** do Tech Challenge.
+## 2. Instalar as dependências e registrar os pacotes internos
 
-A proposta é utilizar o dataset **eICU Collaborative Research Database Demo** para simular o monitoramento preventivo de pacientes em UTI, identificando padrões fora do comportamento esperado em:
+```bash
+pip install -r requirements.txt
+pip install -e .
+```
 
-* sinais vitais;
-* exames laboratoriais;
-* medicações;
-* evolução clínica.
+> O projeto foi validado com Python 3.12. O `requirements.txt` unificado cobre o módulo clínico, o módulo de vídeo e os testes. O `pip install -e .` registra os pacotes internos (`eicu_anomaly_detection`, `modulo_video`, `fusion`) como editáveis.
 
-## Objetivo
+## 3. Obter os dados
 
-Detectar possíveis anomalias clínicas em pacientes de UTI a partir de dados estruturados e gerar alertas automáticos contendo:
+Você tem duas opções:
 
-* score de risco;
-* nível de risco;
-* tipo de anomalia;
-* descrição dos fatores encontrados;
-* recomendação para a equipe médica.
+**Opção A — dados mockados (recomendado para testes locais):**
+
+```bash
+python tests/fixtures/generate_fixtures.py
+```
+
+Isso cria:
+
+```text
+tests/fixtures/
+├── mock_eicu/
+│   ├── patient.csv.gz
+│   ├── vitalPeriodic.csv.gz
+│   ├── vitalAperiodic.csv.gz
+│   ├── lab.csv.gz
+│   └── medication.csv.gz
+└── test_video.mp4
+```
+
+**Opção B — dados reais do eICU Demo:**
+
+Crie uma conta gratuita em https://physionet.org/, baixe os arquivos
+`vitalPeriodic.csv.gz`, `lab.csv.gz` e `medication.csv.gz` do
+[eICU Collaborative Research Database Demo v2.0.1](https://physionet.org/content/eicu-crd-demo/2.0.1/)
+e coloque-os em:
+
+```text
+eicu-anomaly-detection/modulo_anomalias/data/raw/
+```
+
+## 4. Executar a fusão multimodal
+
+Com os dados mockados:
+
+```bash
+python main.py \
+  --video tests/fixtures/test_video.mp4 \
+  --eicu-data tests/fixtures/mock_eicu \
+  --video-patient-id local_test \
+  --sem-objetos
+```
+
+Com dados eICU reais (sem filtro de paciente, processa todos):
+
+```bash
+python main.py \
+  --video tests/fixtures/test_video.mp4 \
+  --video-patient-id local_test \
+  --sem-objetos
+```
+
+Com filtros opcionais:
+
+```bash
+python main.py --video sessao.mp4 \
+  --clinical-patient-id 141765 \
+  --video-patient-id p001 \
+  --sem-objetos \
+  --silencioso
+```
+
+### Evitando data leakage no adapter clínico
+
+Por padrão, o `ClinicalAdapter` treina o detector com todos os pacientes do
+`--eicu-data` e depois prediz sobre o mesmo conjunto. Isso pode elevar os
+scores de risco do paciente solicitado, pois o modelo já "viu" esse paciente
+durante o treinamento.
+
+Para comparar com uma abordagem sem esse viés, ative o modo leave-one-out via
+variável de ambiente:
+
+```bash
+ADAPTER_CLINICAL_LEAVE_ONE_OUT=1 python main.py \
+  --video tests/fixtures/test_video.mp4 \
+  --eicu-data tests/fixtures/mock_eicu \
+  --clinical-patient-id 141761 \
+  --video-patient-id local_test \
+  --sem-objetos \
+  --silencioso
+```
+
+Nesse modo, o detector é treinado com todos os pacientes **exceto** o
+`--clinical-patient-id` informado, e a predição é feita apenas para esse
+paciente. Atenção: sem ground truth médico, a escolha entre as abordagens
+permanece uma questão de validação clínica.
+
+## 5. Rodar os testes
+
+```bash
+pytest tests/ -v
+```
+
+> Os testes unitários não dependem das fixtures binárias. O teste E2E (`tests/test_e2e_mock.py`) gera as fixtures automaticamente na primeira execução, mas você pode gerá-las manualmente antes com `python tests/fixtures/generate_fixtures.py`.
 
 ---
 
-## Estrutura do módulo
+# Módulos individuais
+
+Cada módulo pode ser executado de forma isolada, sem passar pela fusão multimodal.
+
+## Módulo clínico (`eicu-anomaly-detection`)
+
+### Estrutura
 
 ```text
 eicu-anomaly-detection/
@@ -55,259 +152,185 @@ eicu-anomaly-detection/
 │   └── test_output.py
 └── modulo_anomalias/
     ├── data/
-    │   ├── raw/
+    │   ├── raw/                  # Colocar os CSVs do eICU aqui
     │   └── processed/
     ├── models/
     └── outputs/
 ```
 
----
-
-## Dataset utilizado
-
-Dataset:
-
-**eICU Collaborative Research Database Demo v2.0.1**
-
-Página oficial:
-
-https://physionet.org/content/eicu-crd-demo/2.0.1/
-
-Os arquivos brutos não são versionados no Git. Para executar o módulo, baixe pelo menos os seguintes arquivos:
-
-```text
-vitalPeriodic.csv.gz
-lab.csv.gz
-medication.csv.gz
-```
-
-Coloque-os dentro de:
-
-```text
-eicu-anomaly-detection/modulo_anomalias/data/raw/
-```
-
-A estrutura esperada é:
-
-```text
-eicu-anomaly-detection/modulo_anomalias/
-└── data/
-    └── raw/
-        ├── vitalPeriodic.csv.gz
-        ├── lab.csv.gz
-        └── medication.csv.gz
-```
-
----
-
-# Execução local
-
-Os comandos abaixo devem ser executados a partir da raiz do repositório.
-
-## 1. Criar o ambiente virtual
+### Executar o pipeline completo
 
 ```bash
-python -m venv venv
-```
-
-## 2. Ativar o ambiente virtual
-
-No Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-No Linux ou macOS:
-
-```bash
-source venv/bin/activate
-```
-
-## 3. Instalar as dependências
-
-O `requirements.txt` na raiz contém as dependências unificadas para rodar a fusão multimodal (módulo clínico + vídeo + testes). O `pyproject.toml` registra os módulos internos como pacotes Python editáveis.
-
-```bash
-pip install -r requirements.txt
-pip install -e .
-```
-
-> Se você for rodar apenas o módulo de vídeo de forma isolada, também é possível usar `pip install -r modulo_video/requirements.txt`. Para o módulo clínico isolado, basta o `requirements.txt` da raiz.
-
-## 4. Entrar na pasta do módulo
-
-```bash
-cd eicu-anomaly-detection/modulo_anomalias
-```
-
-A partir deste ponto, os comandos devem ser executados dentro de `eicu-anomaly-detection/modulo_anomalias`.
-
----
-
-## Testar o carregamento dos dados
-
-Execute:
-
-```bash
-python -m src.data_loader
-```
-
-Esse comando verifica se os arquivos do eICU foram encontrados e se podem ser carregados corretamente.
-
-Resultado esperado:
-
-```text
-Testando carregamento do eICU-CRD Demo...
-
-Arquivo vitalPeriodic carregado com sucesso!
-Quantidade de linhas: ...
-Quantidade de colunas: ...
-
-Colunas encontradas:
-...
-```
-
-Se esse teste funcionar, significa que o módulo está encontrando e lendo corretamente os arquivos da pasta `data/raw/`.
-
----
-
-## Testar a criação das features
-
-Execute:
-
-```bash
-python -m src.feature_builder
-```
-
-Esse comando transforma os dados brutos em variáveis agregadas por internação, utilizando o identificador:
-
-```text
-patientunitstayid
-```
-
-Exemplos de features criadas:
-
-```text
-heartrate_mean
-heartrate_min
-heartrate_max
-heartrate_std
-
-sao2_mean
-sao2_min
-sao2_max
-
-respiration_mean
-respiration_max
-
-temperature_mean
-temperature_max
-
-systemicsystolic_min
-
-lab_creatinine_max
-lab_glucose_max
-lab_potassium_min
-
-medication_total_count
-medication_unique_count
-medication_vasoactive_count
-medication_antibiotic_count
-medication_sedative_count
-```
-
-Essas features serão utilizadas pelo modelo de detecção de anomalias.
-
----
-
-## Treinar o modelo
-
-Execute:
-
-```bash
-python -m src.train
+python -m eicu_anomaly_detection.train
 ```
 
 Esse comando executa o pipeline completo:
 
-1. carrega os sinais vitais;
-2. carrega os exames laboratoriais;
-3. carrega os dados de medicação;
-4. cria as features clínicas;
-5. trata os valores ausentes;
-6. treina o modelo de detecção de anomalias;
-7. gera predições;
-8. classifica os níveis de risco;
-9. gera alertas automáticos;
-10. salva os resultados.
+1. carrega os sinais vitais, exames laboratoriais e medicações;
+2. cria as features clínicas;
+3. treina o modelo Isolation Forest;
+4. gera predições, scores e níveis de risco;
+5. gera alertas;
+6. salva artefatos em `data/processed/`, `models/` e `outputs/`.
 
-O modelo utilizado nesta versão é o:
+### Testar componentes isoladamente
 
-```text
-Isolation Forest
-```
-
-O Isolation Forest é um algoritmo não supervisionado utilizado para encontrar registros com comportamento diferente do padrão predominante no conjunto de dados.
-
----
-
-## Arquivos gerados
-
-Após o treinamento, serão gerados:
-
-```text
-eicu-anomaly-detection/modulo_anomalias/data/processed/clinical_features.csv
-
-eicu-anomaly-detection/modulo_anomalias/models/clinical_anomaly_detector.joblib
-
-eicu-anomaly-detection/modulo_anomalias/outputs/predictions.csv
-eicu-anomaly-detection/modulo_anomalias/outputs/alerts.csv
-eicu-anomaly-detection/modulo_anomalias/outputs/alerts.json
-```
-
-### `clinical_features.csv`
-
-Contém as variáveis clínicas criadas a partir dos dados brutos.
-
-### `clinical_anomaly_detector.joblib`
-
-Contém o modelo Isolation Forest treinado.
-
-### `predictions.csv`
-
-Contém o resultado do modelo para cada internação processada, incluindo:
-
-* classificação normal ou anômala;
-* score de risco;
-* nível de risco.
-
-### `alerts.csv`
-
-Contém os alertas em formato tabular.
-
-### `alerts.json`
-
-Contém os alertas em formato JSON, preparado para integração futura com os outros módulos.
-
----
-
-## Testar os resultados
-
-Depois de executar o treinamento, rode:
+Carregamento dos dados:
 
 ```bash
-python -m src.test_output
+python -m eicu_anomaly_detection.data_loader
 ```
 
-Esse comando apresenta:
+Criação das features:
 
-* total de internações processadas;
-* total de predições;
-* total de alertas;
-* distribuição dos níveis de risco;
-* exemplos de alertas;
-* exemplos da saída em JSON.
+```bash
+python -m eicu_anomaly_detection.feature_builder
+```
+
+Geração de alertas a partir do treinamento:
+
+```bash
+python -m eicu_anomaly_detection.train
+python -m eicu_anomaly_detection.test_output
+```
+
+### Usar como biblioteca Python
+
+```python
+from eicu_anomaly_detection.data_loader import EICUDataLoader
+from eicu_anomaly_detection.feature_builder import ClinicalFeatureBuilder
+from eicu_anomaly_detection.anomaly_detector import ClinicalAnomalyDetector
+from eicu_anomaly_detection.alert_generator import AlertGenerator
+
+loader = EICUDataLoader()
+vital_df = loader.load_vital_periodic()
+
+features = ClinicalFeatureBuilder().build_vital_features(vital_df)
+
+detector = ClinicalAnomalyDetector()
+detector.train(features)
+predictions = detector.predict(features)
+
+alerts = AlertGenerator().generate_alerts(predictions, features)
+print(alerts)
+```
+
+## Módulo de vídeo (`modulo_video`)
+
+### Executar o processamento de um vídeo
+
+```bash
+python -m modulo_video.pipeline tests/fixtures/test_video.mp4 --sem-objetos
+```
+
+Ou, via Python:
+
+```python
+from modulo_video.pipeline import processar_video
+
+alerta = processar_video(
+    video_path="tests/fixtures/test_video.mp4",
+    usar_objetos=False,
+)
+print(alerta)
+```
+
+---
+
+# Fusão Multimodal
+
+A integração entre os módulos é feita pelo `main.py` na raiz. Ele executa os
+adapters de cada módulo e consolida os alertas em um único relatório JSON.
+
+## Estrutura da integração
+
+```text
+Tech-Challenge-FIAP-FASE4/
+├── eicu-anomaly-detection/       # Módulo clínico (eICU)
+│   ├── src/                      # Pacote Python eicu_anomaly_detection
+│   └── modulo_anomalias/         # Dados, modelos e outputs do módulo
+│
+├── modulo_video/                 # Módulo de vídeo/fisioterapia
+│   └── src/                      # Pacote Python modulo_video
+│
+├── fusion/                       # Motor de fusão multimodal
+│   ├── adapters/                 # Adaptadores para os módulos externos
+│   │   ├── base.py
+│   │   ├── clinical/             # Adapter do módulo eICU
+│   │   ├── video/                # Adapter do módulo de vídeo
+│   │   └── audio/                # Adapter stub (futuro módulo de áudio)
+│   ├── core/
+│   │   ├── fusion.py
+│   │   └── schema.py
+│   └── io.py
+│
+├── tests/                        # Testes unitários e E2E
+│   ├── fixtures/
+│   ├── fusion/
+│   └── test_e2e_mock.py
+│
+├── main.py                       # CLI de orquestração
+├── outputs/                      # Relatório final gerado
+└── requirements.txt
+```
+
+## Saída
+
+O relatório final é salvo em:
+
+```text
+outputs/final_multimodal_report.json
+```
+
+Exemplo de resumo:
+
+```json
+{
+  "gerado_em": "2026-07-18T14:30:22",
+  "resumo": {
+    "total_alertas": 5,
+    "score_medio": 0.51,
+    "nivel_mais_critico": "alto",
+    "modulos_analisados": ["anomalias_clinicas_uti", "video_fisioterapia"],
+    "modulos_com_alerta": ["anomalias_clinicas_uti", "video_fisioterapia"],
+    "recomendacao_geral": "Acionar equipe médica para reavaliação imediata do paciente."
+  },
+  "alertas": [
+    {
+      "module_id": "141765",
+      "modulo": "anomalias_clinicas_uti",
+      "tipo_anomalia": "sinais_vitais",
+      "score_risco": 0.91,
+      "nivel_risco": "alto",
+      "descricao": "...",
+      "recomendacao": "..."
+    }
+  ]
+}
+```
+
+### Regras de fusão
+
+* `score_medio` = média dos `score_risco` de todos os alertas.
+* `nivel_mais_critico` = nível do alerta com maior `score_risco`.
+* `recomendacao_geral` = baseada no `nivel_mais_critico`.
+
+### Extensibilidade
+
+Adicionar o módulo de áudio (branch `001-audio-texto-pipeline`) exige apenas:
+
+1. Implementar `AudioAdapter.run()` em `fusion/adapters/audio/adapter.py`.
+2. Adicionar `--audio` no `main.py`.
+3. Registrar `AudioAdapter` no `MultimodalFusion`.
+
+Nenhuma mudança é necessária no motor de fusão em `fusion/core/fusion.py`.
+
+## Integração futura
+
+Como os módulos utilizam datasets diferentes, os identificadores (`module_id`)
+não representam necessariamente o mesmo paciente real. A fusão é uma
+demonstração arquitetural de como diferentes fontes podem alimentar um
+sistema central de monitoramento preventivo.
 
 ---
 
@@ -315,7 +338,7 @@ Esse comando apresenta:
 
 No Colab, os comandos de terminal precisam começar com `!`.
 
-Primeiro, entre na raiz do repositório:
+Entre na raiz do repositório:
 
 ```python
 %cd /content/Tech-Challenge-FIAP-FASE4
@@ -325,36 +348,22 @@ Instale as dependências:
 
 ```python
 !pip install -r requirements.txt
+!pip install -e .
 ```
 
-Depois, entre no módulo:
+Teste o módulo clínico:
 
 ```python
-%cd eicu-anomaly-detection/modulo_anomalias
+!python -m eicu_anomaly_detection.data_loader
+!python -m eicu_anomaly_detection.feature_builder
+!python -m eicu_anomaly_detection.train
 ```
 
-Teste o carregamento:
+Teste a fusão:
 
 ```python
-!python -m src.data_loader
-```
-
-Teste a criação das features:
-
-```python
-!python -m src.feature_builder
-```
-
-Treine o modelo:
-
-```python
-!python -m src.train
-```
-
-Visualize os resultados:
-
-```python
-!python -m src.test_output
+!python tests/fixtures/generate_fixtures.py
+!python main.py --video tests/fixtures/test_video.mp4 --eicu-data tests/fixtures/mock_eicu --video-patient-id local_test --sem-objetos
 ```
 
 > O caminho `/content/Tech-Challenge-FIAP-FASE4` deve ser adaptado caso o repositório tenha sido clonado com outro nome ou em outra localização.
@@ -420,233 +429,40 @@ Apresenta uma sugestão de encaminhamento para a equipe médica.
 
 ---
 
-# Fusão Multimodal
+## Dataset utilizado
 
-A integração entre os módulos é feita pelo `main.py` na raiz. Ele executa os
-adapters de cada módulo e consolida os alertas em um único relatório JSON.
+Dataset:
 
-## Estrutura da integração
+**eICU Collaborative Research Database Demo v2.0.1**
+
+Página oficial:
+
+https://physionet.org/content/eicu-crd-demo/2.0.1/
+
+Os arquivos brutos não são versionados no Git. Para executar o módulo, baixe pelo menos os seguintes arquivos:
 
 ```text
-Tech-Challenge-FIAP-FASE4/
-├── eicu-anomaly-detection/       # Módulo clínico (eICU)
-│   ├── src/                      # Pacote Python eicu_anomaly_detection
-│   └── modulo_anomalias/         # Dados, modelos e outputs do módulo
-│
-├── modulo_video/                 # Módulo de vídeo/fisioterapia
-│   └── src/                      # Pacote Python modulo_video
-│
-├── fusion/                       # Motor de fusão multimodal
-│   ├── adapters/                 # Adaptadores para os módulos externos
-│   │   ├── base.py
-│   │   ├── clinical/             # Adapter do módulo eICU
-│   │   ├── video/                # Adapter do módulo de vídeo
-│   │   └── audio/                # Adapter stub (futuro módulo de áudio)
-│   ├── core/
-│   │   ├── fusion.py
-│   │   └── schema.py
-│   └── io.py
-│
-├── tests/                        # Testes unitários e E2E
-│   ├── fixtures/
-│   ├── fusion/
-│   └── test_e2e_mock.py
-│
-├── main.py                       # CLI de orquestração
-├── outputs/                      # Relatório final gerado
-└── requirements.txt
+vitalPeriodic.csv.gz
+lab.csv.gz
+medication.csv.gz
 ```
 
-## Como executar
-
-### 1. Obter os dados
-
-Você tem duas opções:
-
-**Opção A — usar dados mockados (recomendado para testes locais):**
-
-```bash
-python tests/fixtures/generate_fixtures.py
-```
-
-Isso cria `tests/fixtures/mock_eicu/` e `tests/fixtures/test_video.mp4`.
-
-**Opção B — baixar o eICU Demo real:**
-
-Crie uma conta gratuita em https://physionet.org/, baixe os arquivos
-`vitalPeriodic.csv.gz`, `lab.csv.gz` e `medication.csv.gz` do
-[eICU Collaborative Research Database Demo v2.0.1](https://physionet.org/content/eicu-crd-demo/2.0.1/)
-e coloque-os em:
+Coloque-os dentro de:
 
 ```text
 eicu-anomaly-detection/modulo_anomalias/data/raw/
 ```
 
-### 2. Instalar as dependências
-
-```bash
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-pip install -e .
-```
-
-> O projeto foi validado com Python 3.12. O `requirements.txt` unificado cobre o módulo clínico, o módulo de vídeo e os testes. O `pip install -e .` registra os pacotes internos (`eicu_anomaly_detection`, `modulo_video`, `fusion`) como editáveis.
-
-### 3. Obter os dados
-
-Você tem duas opções:
-
-**Opção A — dados mockados (recomendado para testes):**
-
-```bash
-python tests/fixtures/generate_fixtures.py
-```
-
-Isso cria:
+A estrutura esperada é:
 
 ```text
-tests/fixtures/
-├── mock_eicu/
-│   ├── patient.csv.gz
-│   ├── vitalPeriodic.csv.gz
-│   ├── vitalAperiodic.csv.gz
-│   ├── lab.csv.gz
-│   └── medication.csv.gz
-└── test_video.mp4
+eicu-anomaly-detection/modulo_anomalias/
+└── data/
+    └── raw/
+        ├── vitalPeriodic.csv.gz
+        ├── lab.csv.gz
+        └── medication.csv.gz
 ```
-
-**Opção B — dados reais do eICU Demo:**
-
-Baixe os arquivos `vitalPeriodic.csv.gz`, `lab.csv.gz` e `medication.csv.gz` do
-[eICU Collaborative Research Database Demo](https://physionet.org/content/eicu-crd-demo/2.0.1/)
-e coloque-os em:
-
-```text
-eicu-anomaly-detection/modulo_anomalias/data/raw/
-```
-
-### 4. Executar a fusão
-
-Com os dados mockados:
-
-```bash
-python main.py \
-  --video tests/fixtures/test_video.mp4 \
-  --eicu-data tests/fixtures/mock_eicu \
-  --video-patient-id local_test \
-  --sem-objetos
-```
-
-Com dados eICU reais (sem filtro de paciente, processa todos):
-
-```bash
-python main.py \
-  --video tests/fixtures/test_video.mp4 \
-  --video-patient-id local_test \
-  --sem-objetos
-```
-
-Com filtros opcionais:
-
-```bash
-python main.py --video sessao.mp4 \
-  --clinical-patient-id 141765 \
-  --video-patient-id p001 \
-  --sem-objetos \
-  --silencioso
-```
-
-#### Evitando data leakage no adapter clínico
-
-Por padrão, o `ClinicalAdapter` treina o detector com todos os pacientes do
-`--eicu-data` e depois prediz sobre o mesmo conjunto. Isso pode elevar os
-scores de risco do paciente solicitado, pois o modelo já "viu" esse paciente
-durante o treinamento.
-
-Para comparar com uma abordagem sem esse viés, ative o modo leave-one-out via
-variável de ambiente:
-
-```bash
-ADAPTER_CLINICAL_LEAVE_ONE_OUT=1 python main.py \
-  --video tests/fixtures/test_video.mp4 \
-  --eicu-data tests/fixtures/mock_eicu \
-  --clinical-patient-id 141761 \
-  --video-patient-id local_test \
-  --sem-objetos \
-  --silencioso
-```
-
-Nesse modo, o detector é treinado com todos os pacientes **exceto** o
-`--clinical-patient-id` informado, e a predição é feita apenas para esse
-paciente. Atenção: sem ground truth médico, a escolha entre as abordagens
- permanece uma questão de validação clínica.
-
-### 5. Rodar os testes
-
-```bash
-pytest tests/ -v
-```
-
-> Os testes unitários não dependem das fixtures binárias. O teste E2E (`tests/test_e2e_mock.py`) gera as fixtures automaticamente na primeira execução, mas você pode gerá-las manualmente antes com `python tests/fixtures/generate_fixtures.py`.
-
-### 6. Saída
-
-O relatório final é salvo em:
-
-```text
-outputs/final_multimodal_report.json
-```
-
-Exemplo de resumo:
-
-```json
-{
-  "gerado_em": "2026-07-18T14:30:22",
-  "resumo": {
-    "total_alertas": 5,
-    "score_medio": 0.51,
-    "nivel_mais_critico": "alto",
-    "modulos_analisados": ["anomalias_clinicas_uti", "video_fisioterapia"],
-    "modulos_com_alerta": ["anomalias_clinicas_uti", "video_fisioterapia"],
-    "recomendacao_geral": "Acionar equipe médica para reavaliação imediata do paciente."
-  },
-  "alertas": [
-    {
-      "module_id": "141765",
-      "modulo": "anomalias_clinicas_uti",
-      "tipo_anomalia": "sinais_vitais",
-      "score_risco": 0.91,
-      "nivel_risco": "alto",
-      "descricao": "...",
-      "recomendacao": "..."
-    }
-  ]
-}
-```
-
-### Regras de fusão
-
-* `score_medio` = média dos `score_risco` de todos os alertas.
-* `nivel_mais_critico` = nível do alerta com maior `score_risco`.
-* `recomendacao_geral` = baseada no `nivel_mais_critico`.
-
-### Extensibilidade
-
-Adicionar o módulo de áudio (branch `001-audio-texto-pipeline`) exige apenas:
-
-1. Implementar `AudioAdapter.run()` em `adapters/audio/adapter.py`.
-2. Adicionar `--audio` no `main.py`.
-3. Registrar `AudioAdapter` no `MultimodalFusion`.
-
-Nenhuma mudança é necessária no motor de fusão em `fusion/core/fusion.py`.
-
-## Integração futura
-
-Como os módulos utilizam datasets diferentes, os identificadores (`module_id`)
-não representam necessariamente o mesmo paciente real. A fusão é uma
-demonstração arquitetural de como diferentes fontes podem alimentar um
-sistema central de monitoramento preventivo.
 
 ---
 

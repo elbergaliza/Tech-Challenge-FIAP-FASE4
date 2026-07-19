@@ -557,6 +557,31 @@ python main.py --video sessao.mp4 \
   --silencioso
 ```
 
+#### Evitando data leakage no adapter clínico
+
+Por padrão, o `ClinicalAdapter` treina o detector com todos os pacientes do
+`--eicu-data` e depois prediz sobre o mesmo conjunto. Isso pode elevar os
+scores de risco do paciente solicitado, pois o modelo já "viu" esse paciente
+durante o treinamento.
+
+Para comparar com uma abordagem sem esse viés, ative o modo leave-one-out via
+variável de ambiente:
+
+```bash
+ADAPTER_CLINICAL_LEAVE_ONE_OUT=1 python main.py \
+  --video tests/fixtures/test_video.mp4 \
+  --eicu-data tests/fixtures/mock_eicu \
+  --clinical-patient-id 141761 \
+  --video-patient-id local_test \
+  --sem-objetos \
+  --silencioso
+```
+
+Nesse modo, o detector é treinado com todos os pacientes **exceto** o
+`--clinical-patient-id` informado, e a predição é feita apenas para esse
+paciente. Atenção: sem ground truth médico, a escolha entre as abordagens
+ permanece uma questão de validação clínica.
+
 ### 5. Rodar os testes
 
 ```bash

@@ -136,44 +136,6 @@ eicu-anomaly-detection/modulo_anomalias/
         └── medication.csv.gz
 ```
 
-## Mock para testes locais e E2E
-
-Para rodar a pipeline sem baixar o dataset real do PhysioNet, gere fixtures
-sintéticas:
-
-```bash
-python tests/fixtures/generate_fixtures.py
-```
-
-Isso cria:
-
-```text
-tests/fixtures/
-├── mock_eicu/
-│   ├── patient.csv.gz
-│   ├── vitalPeriodic.csv.gz
-│   ├── vitalAperiodic.csv.gz
-│   ├── lab.csv.gz
-│   └── medication.csv.gz
-└── test_video.mp4
-```
-
-Depois execute a pipeline com os dados mockados:
-
-```bash
-python main.py \
-  --video tests/fixtures/test_video.mp4 \
-  --eicu-data tests/fixtures/mock_eicu \
-  --video-patient-id local_test \
-  --sem-objetos
-```
-
-Para rodar os testes E2E mockados:
-
-```bash
-pytest tests/test_e2e_mock.py -v
-```
-
 ---
 
 # Execução local
@@ -554,9 +516,11 @@ pip install -e .
 
 > O projeto foi validado com Python 3.12. O `requirements.txt` unificado cobre o módulo clínico, o módulo de vídeo e os testes. O `pip install -e .` registra os pacotes internos (`eicu_anomaly_detection`, `modulo_video`, `adapters`, `fusion`) como editáveis.
 
-### 3. Gerar fixtures mockadas (dados de teste)
+### 3. Obter os dados
 
-Para rodar a pipeline e os testes sem baixar o dataset real do PhysioNet:
+Você tem duas opções:
+
+**Opção A — dados mockados (recomendado para testes):**
 
 ```bash
 python tests/fixtures/generate_fixtures.py
@@ -573,6 +537,16 @@ tests/fixtures/
 │   ├── lab.csv.gz
 │   └── medication.csv.gz
 └── test_video.mp4
+```
+
+**Opção B — dados reais do eICU Demo:**
+
+Baixe os arquivos `vitalPeriodic.csv.gz`, `lab.csv.gz` e `medication.csv.gz` do
+[eICU Collaborative Research Database Demo](https://physionet.org/content/eicu-crd-demo/2.0.1/)
+e coloque-os em:
+
+```text
+eicu-anomaly-detection/modulo_anomalias/data/raw/
 ```
 
 ### 4. Executar a fusão

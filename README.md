@@ -336,81 +336,33 @@ sistema central de monitoramento preventivo.
 
 # Execução no Google Colab
 
-Há um notebook pronto em `notebooks/TechChallenge_Colab_Completo.ipynb`. Ele já clona o repositório, instala as dependências, baixa os dados do eICU Demo e executa a fusão multimodal.
+O jeito mais simples de executar o projeto com dados reais é usar o notebook `notebooks/TechChallenge_Colab_Completo.ipynb`.
 
-Para abrir no Colab, faça upload do arquivo `notebooks/TechChallenge_Colab_Completo.ipynb` ou use a URL pública do repositório.
+## Passo a passo
 
-## Células do notebook
+1. **Abra o notebook no Colab**
+   - Faça upload de `notebooks/TechChallenge_Colab_Completo.ipynb` no Google Colab, ou
+   - Abra a partir da URL pública do repositório.
 
-1. **Clone e instalação**: clona o repositório e instala os pacotes editáveis (`pip install -e .`).
-2. **Dados eICU**: baixa automaticamente os arquivos `vitalPeriodic.csv.gz`, `lab.csv.gz` e `medication.csv.gz` do eICU Demo.
-3. **Vídeo**: pode usar o vídeo de exemplo gerado via fixtures ou subir um vídeo próprio.
-4. **Fusão multimodal**: executa `main.py` com os dados reais do eICU e o vídeo escolhido.
-5. **Relatório final**: mostra o JSON de saída com os alertas unificados.
+2. **Execute as células em ordem**
+   1. **Clone e instalação**: faz `git clone`, instala as dependências e registra os pacotes editáveis com `pip install -e .`.
+   2. **Dados reais do eICU Demo**: baixa automaticamente os arquivos `vitalPeriodic.csv.gz`, `lab.csv.gz` e `medication.csv.gz` do eICU Demo (PhysioNet).
+   3. **Vídeo**: gera um vídeo de teste com OpenCV. Opcionalmente, você pode fazer upload de um vídeo próprio para `modulo_video/data/exemplos/` e ajustar o caminho na célula.
+   4. **Fusão multimodal**: executa `main.py` usando os dados reais do eICU e o vídeo selecionado.
+   5. **Relatório final**: exibe o JSON `outputs/final_multimodal_report.json` com os alertas unificados.
 
-> Para testar uma branch de desenvolvimento, defina antes da primeira célula:
-> ```python
-> import os
-> os.environ['NOTEBOOK_BRANCH'] = 'feat/fusao-multimodal'
-> ```
+## Testar uma branch específica
 
-## Execução manual (sem o notebook)
-
-Se preferir, execute os comandos abaixo diretamente em células do Colab:
+Para testar alterações em desenvolvimento, defina a branch antes da primeira célula:
 
 ```python
-%cd /content/Tech-Challenge-FIAP-FASE4
+import os
+os.environ['NOTEBOOK_BRANCH'] = 'feat/fusao-multimodal'
 ```
 
-```python
-!pip install -r requirements.txt
-!pip install -e .
-```
+O valor padrão é `main`.
 
-### Dados reais do eICU Demo
-
-```python
-import os, urllib.request
-
-EICU_DIR = '/content/Tech-Challenge-FIAP-FASE4/eicu-anomaly-detection/modulo_anomalias/data/raw'
-os.makedirs(EICU_DIR, exist_ok=True)
-
-base_url = 'https://physionet.org/files/eicu-crd-demo/2.0.1/'
-arquivos = ['vitalPeriodic.csv.gz', 'lab.csv.gz', 'medication.csv.gz']
-
-for arq in arquivos:
-    destino = os.path.join(EICU_DIR, arq)
-    if os.path.exists(destino):
-        print(f'{arq} ja existe.')
-        continue
-    print(f'Baixando {arq}...')
-    urllib.request.urlretrieve(base_url + arq, destino)
-    print(f'  OK: {destino}')
-```
-
-### Vídeo
-
-Use o vídeo de exemplo gerado pelas fixtures:
-
-```python
-!python tests/fixtures/generate_fixtures.py
-```
-
-Ou faça upload do seu próprio vídeo para `modulo_video/data/exemplos/` e ajuste o caminho.
-
-### Fusão com dados reais
-
-```python
-!python main.py   --video tests/fixtures/test_video.mp4   --video-patient-id local_test   --sem-objetos
-```
-
-Com filtro de paciente clínico:
-
-```python
-!python main.py   --video tests/fixtures/test_video.mp4   --clinical-patient-id 141765   --video-patient-id local_test   --sem-objetos
-```
-
-> O caminho `/content/Tech-Challenge-FIAP-FASE4` deve ser adaptado caso o repositório tenha sido clonado com outro nome ou em outra localização.
+> Atenção: o download do eICU Demo pode demorar alguns minutos. Os arquivos são públicos e não exigem login.
 
 ---
 

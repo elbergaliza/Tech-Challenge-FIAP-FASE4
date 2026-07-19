@@ -7,13 +7,17 @@ alerta retornado para o schema ``AlertaNormalizado``.
 
 from __future__ import annotations
 
-import importlib.util
 import sys
 from pathlib import Path
 from types import ModuleType
 from typing import Any
 
-from adapters.base import ModuleAdapter
+from adapters.base import (
+    ModuleAdapter,
+    expose_as_src,
+    load_module_from_path,
+    load_package_from_path,
+)
 from fusion.core.schema import AlertaNormalizado, classificar_nivel
 
 
@@ -37,46 +41,18 @@ class VideoAdapter(ModuleAdapter):
         self.silencioso = silencioso
         self._src_pkg: ModuleType | None = None
 
-    def _load_module(self, module_path: Path, package: str = "video_src") -> ModuleType:
-        """Carrega um módulo Python pelo caminho absoluto sem depender de sys.path."""
-        module_name = f"{package}.{module_path.stem}"
-        spec = importlib.util.spec_from_file_location(module_name, module_path)
-        if spec is None or spec.loader is None:
-            raise ImportError(f"Não foi possível carregar {module_path}")
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-        spec.loader.exec_module(module)
-        return module
-
     def _load_video_package(self) -> ModuleType:
         """Carrega o pacote 'src' do modulo_video como 'video_src'."""
         if self._src_pkg is not None:
             return self._src_pkg
 
-        package_name = "video_src"
-        pkg_path = self.SRC_PATH
-
-        pkg_spec = importlib.util.spec_from_file_location(
-            package_name,
-            pkg_path / "__init__.py",
-            submodule_search_locations=[str(pkg_path), str(self.MODULE_PATH)],
-        )
-        if pkg_spec is None or pkg_spec.loader is None:
-            raise ImportError(f"Não foi possível carregar pacote {pkg_path}")
-        pkg = importlib.util.module_from_spec(pkg_spec)
-        sys.modules[package_name] = pkg
-        pkg_spec.loader.exec_module(pkg)
-
-        # Expoe o pacote tambem como 'src' e 'config' durante o carregamento,
-        # pois os modulos internos usam tanto `from config import ...` quanto
-        # `from src.xxx import ...`.
+        pkg = load_package_from_path("video_src", self.SRC_PATH)
         original_src = sys.modules.get("src")
         original_config = sys.modules.get("config")
         sys.modules["src"] = pkg
 
         try:
-            # config deve estar disponivel como 'config' e como 'src.config'.
-            config_module = self._load_module(self.CONFIG_PATH, package=package_name)
+            config_module = load_module_from_path(self.CONFIG_PATH, package="video_src")
             sys.modules["config"] = config_module
             sys.modules["src.config"] = config_module
 
@@ -87,17 +63,13 @@ class VideoAdapter(ModuleAdapter):
                 "risk_scoring.py",
                 "report.py",
                 "pipeline.py",
+                "object_detector.py",
             ]
             for filename in src_modules:
-                module_path = pkg_path / filename
+                module_path = self.SRC_PATH / filename
                 if module_path.exists():
-                    mod = self._load_module(module_path, package=package_name)
+                    mod = load_module_from_path(module_path, package="video_src")
                     sys.modules[f"src.{module_path.stem}"] = mod
-
-            object_detector_path = pkg_path / "object_detector.py"
-            if object_detector_path.exists():
-                mod = self._load_module(object_detector_path, package=package_name)
-                sys.modules["src.object_detector"] = mod
         finally:
             if original_src is None:
                 sys.modules.pop("src", None)
@@ -136,24 +108,13 @@ class VideoAdapter(ModuleAdapter):
         self._validar_video()
 
         pkg = self._load_video_package()
+        original_modules = expose_as_src("video_src", pkg)
 
-        # Expoe o pacote carregado tambem como 'src' e 'config' para que as
-        # importacoes relativas internas funcionem durante a execucao.
-        original_src = sys.modules.get("src")
-        original_config = sys.modules.get("config")
-        sys.modules["src"] = pkg
-
-        for mod_name in list(sys.modules.keys()):
-            if mod_name.startswith("video_src."):
-                src_name = "src." + mod_name.split(".", 1)[1]
-                sys.modules[src_name] = sys.modules[mod_name]
         if "video_src.config" in sys.modules:
             sys.modules["config"] = sys.modules["video_src.config"]
 
         try:
-            pipeline = self._load_module(self.SRC_PATH / "pipeline.py")
-            processar_video = pipeline.processar_video
-
+            processar_video = sys.modules["src.pipeline"].processar_video
             alerta = processar_video(
                 caminho_video=str(self.video_path),
                 patient_id=self.patient_id,
@@ -161,17 +122,10 @@ class VideoAdapter(ModuleAdapter):
                 verbose=not self.silencioso,
             )
         finally:
-            # Restaura 'src' e 'config' originais.
-            for mod_name in list(sys.modules.keys()):
-                if mod_name == "src" or mod_name.startswith("src."):
-                    sys.modules.pop(mod_name, None)
-            if original_src is None:
-                sys.modules.pop("src", None)
-            else:
-                sys.modules["src"] = original_src
-            if original_config is None:
-                sys.modules.pop("config", None)
-            else:
+            from adapters.base import restore_src_modules
+            restore_src_modules(original_modules)
+            original_config = sys.modules.get("config")
+            if original_config is not None and "config" not in original_modules:
                 sys.modules["config"] = original_config
 
         return [self._normalizar_alerta(alerta)]

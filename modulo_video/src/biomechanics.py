@@ -20,7 +20,7 @@ from __future__ import annotations
 import math
 import numpy as np
 
-from config import CONFIANCA_MINIMA
+from .config import CONFIANCA_MINIMA
 
 
 # ---------------------------------------------------------------------------

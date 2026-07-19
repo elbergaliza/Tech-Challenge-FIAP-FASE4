@@ -30,7 +30,7 @@ from __future__ import annotations
 
 import cv2
 
-from config import YOLO_MODELO, YOLO_CONFIANCA
+from .config import YOLO_CONFIANCA, YOLO_MODELO
 
 # Na base COCO, a classe 0 e "person". So nos interessa pessoas aqui.
 _CLASSE_PESSOA = 0

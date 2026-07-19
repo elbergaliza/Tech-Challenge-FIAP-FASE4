@@ -10,27 +10,23 @@ Opcionalmente filtra por um único ``patient_id`` após a predição.
 
 from __future__ import annotations
 
-import sys
 from pathlib import Path
-from types import ModuleType
 from typing import Any
 
-from adapters.base import (
-    ModuleAdapter,
-    expose_as_src,
-    load_module_from_path,
-    load_package_from_path,
-    restore_src_modules,
-)
+import eicu_anomaly_detection.config as config
+from eicu_anomaly_detection.alert_generator import AlertGenerator
+from eicu_anomaly_detection.anomaly_detector import ClinicalAnomalyDetector
+from eicu_anomaly_detection.data_loader import EICUDataLoader
+from eicu_anomaly_detection.feature_builder import ClinicalFeatureBuilder
+
+from adapters.base import ModuleAdapter
 from fusion.core.schema import AlertaNormalizado, classificar_nivel
 
 
 class ClinicalAdapter(ModuleAdapter):
     """Adapter para o módulo ``eicu-anomaly-detection``."""
 
-    MODULE_PATH = Path(__file__).resolve().parents[2] / "eicu-anomaly-detection"
-    SRC_PATH = MODULE_PATH / "src"
-    DEFAULT_DATA_DIR = MODULE_PATH / "modulo_anomalias" / "data" / "raw"
+    DEFAULT_DATA_DIR = Path(__file__).resolve().parents[2] / "eicu-anomaly-detection" / "modulo_anomalias" / "data" / "raw"
 
     def __init__(
         self,
@@ -39,43 +35,6 @@ class ClinicalAdapter(ModuleAdapter):
     ):
         self.data_dir = Path(data_dir) if data_dir else self.DEFAULT_DATA_DIR
         self.patient_id = patient_id
-        self._src_pkg: ModuleType | None = None
-
-    def _load_clinical_package(self) -> ModuleType:
-        """Carrega o pacote 'src' do eicu-anomaly-detection como 'clinical_src'."""
-        if self._src_pkg is not None:
-            return self._src_pkg
-
-        pkg = load_package_from_path("clinical_src", self.SRC_PATH)
-        original_src = sys.modules.get("src")
-        sys.modules["src"] = pkg
-
-        try:
-            # Carrega config primeiro porque os demais módulos dependem dele.
-            config_module = load_module_from_path(
-                self.SRC_PATH / "config.py", package="clinical_src"
-            )
-            sys.modules["src.config"] = config_module
-
-            module_files = [
-                "data_loader.py",
-                "feature_builder.py",
-                "anomaly_detector.py",
-                "alert_generator.py",
-            ]
-            for filename in module_files:
-                py_file = self.SRC_PATH / filename
-                if py_file.exists():
-                    mod = load_module_from_path(py_file, package="clinical_src")
-                    sys.modules[f"src.{py_file.stem}"] = mod
-        finally:
-            if original_src is None:
-                sys.modules.pop("src", None)
-            else:
-                sys.modules["src"] = original_src
-
-        self._src_pkg = pkg
-        return pkg
 
     def _validar_dados(self) -> None:
         """Verifica se os arquivos CSV do eICU existem no data_dir."""
@@ -128,17 +87,6 @@ class ClinicalAdapter(ModuleAdapter):
             )
         return normalizados
 
-    def _configurar_paths(self, config: Any) -> None:
-        """Sobrescreve paths do config para apontar para o data_dir informado."""
-        config.DATA_RAW_DIR = self.data_dir
-        config.VITAL_PERIODIC_FILE = self.data_dir / "vitalPeriodic.csv.gz"
-        config.LAB_FILE = self.data_dir / "lab.csv.gz"
-        config.MEDICATION_FILE = self.data_dir / "medication.csv.gz"
-        config.DATA_PROCESSED_DIR = (
-            self.MODULE_PATH / "modulo_anomalias" / "data" / "processed"
-        )
-        config.OUTPUTS_DIR = self.MODULE_PATH / "modulo_anomalias" / "outputs"
-
     def run(self, **kwargs: Any) -> list[AlertaNormalizado]:
         """
         Executa o pipeline clínico e retorna alertas normalizados.
@@ -148,32 +96,36 @@ class ClinicalAdapter(ModuleAdapter):
         """
         self._validar_dados()
 
-        pkg = self._load_clinical_package()
-        original_modules = expose_as_src("clinical_src", pkg)
+        config.DATA_RAW_DIR = self.data_dir
+        config.VITAL_PERIODIC_FILE = self.data_dir / "vitalPeriodic.csv.gz"
+        config.LAB_FILE = self.data_dir / "lab.csv.gz"
+        config.MEDICATION_FILE = self.data_dir / "medication.csv.gz"
+        config.DATA_PROCESSED_DIR = (
+            Path(__file__).resolve().parents[2]
+            / "eicu-anomaly-detection"
+            / "modulo_anomalias"
+            / "data"
+            / "processed"
+        )
+        config.OUTPUTS_DIR = (
+            Path(__file__).resolve().parents[2]
+            / "eicu-anomaly-detection"
+            / "modulo_anomalias"
+            / "outputs"
+        )
 
-        try:
-            EICUDataLoader = sys.modules["src.data_loader"].EICUDataLoader
-            ClinicalFeatureBuilder = sys.modules["src.feature_builder"].ClinicalFeatureBuilder
-            ClinicalAnomalyDetector = sys.modules["src.anomaly_detector"].ClinicalAnomalyDetector
-            AlertGenerator = sys.modules["src.alert_generator"].AlertGenerator
-            config = sys.modules["src.config"]
+        loader = EICUDataLoader()
+        vital_df = loader.load_vital_periodic()
 
-            self._configurar_paths(config)
+        builder = ClinicalFeatureBuilder()
+        features = builder.build_vital_features(vital_df)
 
-            loader = EICUDataLoader()
-            vital_df = loader.load_vital_periodic()
+        detector = ClinicalAnomalyDetector()
+        detector.train(features)
+        predictions = detector.predict(features)
 
-            builder = ClinicalFeatureBuilder()
-            features = builder.build_vital_features(vital_df)
-
-            detector = ClinicalAnomalyDetector()
-            detector.train(features)
-            predictions = detector.predict(features)
-
-            alert_generator = AlertGenerator()
-            alerts_df = alert_generator.generate_alerts(predictions, features)
-            alerts_df = self._filtrar_alertas(alerts_df, self.patient_id)
-        finally:
-            restore_src_modules(original_modules)
+        alert_generator = AlertGenerator()
+        alerts_df = alert_generator.generate_alerts(predictions, features)
+        alerts_df = self._filtrar_alertas(alerts_df, self.patient_id)
 
         return self._normalizar_alertas(alerts_df)

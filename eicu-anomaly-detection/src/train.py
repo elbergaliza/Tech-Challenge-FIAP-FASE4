@@ -1,8 +1,8 @@
-from src.data_loader import EICUDataLoader
-from src.feature_builder import ClinicalFeatureBuilder
-from src.anomaly_detector import ClinicalAnomalyDetector
-from src.alert_generator import AlertGenerator
-from src import config
+from . import config
+from .alert_generator import AlertGenerator
+from .anomaly_detector import ClinicalAnomalyDetector
+from .data_loader import EICUDataLoader
+from .feature_builder import ClinicalFeatureBuilder
 
 
 def main():

@@ -17,7 +17,7 @@ opcional seria trocar/complementar por um modelo nao supervisionado
 
 from __future__ import annotations
 
-from config import LIMIARES
+from .config import LIMIARES
 
 
 def _gravidade(valor: float, limiar: float, teto: float) -> float:

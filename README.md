@@ -202,10 +202,11 @@ source venv/bin/activate
 
 ## 3. Instalar as dependências
 
-O `requirements.txt` na raiz contém as dependências unificadas para rodar a fusão multimodal (módulo clínico + vídeo + testes).
+O `requirements.txt` na raiz contém as dependências unificadas para rodar a fusão multimodal (módulo clínico + vídeo + testes). O `pyproject.toml` registra os módulos internos como pacotes Python editáveis.
 
 ```bash
 pip install -r requirements.txt
+pip install -e .
 ```
 
 > Se você for rodar apenas o módulo de vídeo de forma isolada, também é possível usar `pip install -r modulo_video/requirements.txt`. Para o módulo clínico isolado, basta o `requirements.txt` da raiz.
@@ -548,9 +549,10 @@ eicu-anomaly-detection/modulo_anomalias/data/raw/
 python -m venv .venv312
 source .venv312/bin/activate  # Windows: .venv312\Scripts\activate
 pip install -r requirements.txt
+pip install -e .
 ```
 
-> O projeto foi validado com Python 3.12. O `requirements.txt` unificado cobre o módulo clínico, o módulo de vídeo e os testes.
+> O projeto foi validado com Python 3.12. O `requirements.txt` unificado cobre o módulo clínico, o módulo de vídeo e os testes. O `pip install -e .` registra os pacotes internos (`eicu_anomaly_detection`, `modulo_video`, `adapters`, `fusion`) como editáveis.
 
 ### 3. Executar a fusão
 

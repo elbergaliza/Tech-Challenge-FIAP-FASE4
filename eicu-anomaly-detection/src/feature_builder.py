@@ -237,7 +237,7 @@ class ClinicalFeatureBuilder:
 
 
 if __name__ == "__main__":
-    from src.data_loader import EICUDataLoader
+    from .data_loader import EICUDataLoader
 
     print("Testando criação de features com vital + lab + medication...")
 

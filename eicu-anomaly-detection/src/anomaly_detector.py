@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.ensemble import IsolationForest
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
-from src import config
+from . import config
 
 
 class ClinicalAnomalyDetector:

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tech-challenge-fase4"
+version = "0.1.0"
+description = "Tech Challenge FIAP Fase 4 — monitoramento multimodal preventivo"
+requires-python = ">=3.12"
+
+[tool.setuptools]
+packages = ["eicu_anomaly_detection", "modulo_video", "adapters", "fusion"]
+
+[tool.setuptools.package-dir]
+eicu_anomaly_detection = "eicu-anomaly-detection/src"
+modulo_video = "modulo_video/src"
+adapters = "adapters"
+fusion = "fusion"

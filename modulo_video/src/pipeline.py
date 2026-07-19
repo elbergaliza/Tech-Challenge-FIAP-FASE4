@@ -12,13 +12,13 @@ funcoes de cada modulo. Isso deixa o fluxo facil de ler e de testar.
 
 from __future__ import annotations
 
-from config import LIMIARES
-from src.pose_extractor import extrair_pose
-from src.object_detector import detectar_objetos, extrair_metricas_objetos
-from src.biomechanics import extrair_metricas
-from src.anomaly_detector import detectar_anomalias
-from src.risk_scoring import calcular_score, classificar_nivel, recomendar
-from src.report import montar_alerta
+from .anomaly_detector import detectar_anomalias
+from .biomechanics import extrair_metricas
+from .config import LIMIARES
+from .object_detector import detectar_objetos, extrair_metricas_objetos
+from .pose_extractor import extrair_pose
+from .report import montar_alerta
+from .risk_scoring import calcular_score, classificar_nivel, recomendar
 
 
 def extrair_metricas_video(

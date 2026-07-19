@@ -554,7 +554,28 @@ pip install -e .
 
 > O projeto foi validado com Python 3.12. O `requirements.txt` unificado cobre o módulo clínico, o módulo de vídeo e os testes. O `pip install -e .` registra os pacotes internos (`eicu_anomaly_detection`, `modulo_video`, `adapters`, `fusion`) como editáveis.
 
-### 3. Executar a fusão
+### 3. Gerar fixtures mockadas (dados de teste)
+
+Para rodar a pipeline e os testes sem baixar o dataset real do PhysioNet:
+
+```bash
+python tests/fixtures/generate_fixtures.py
+```
+
+Isso cria:
+
+```text
+tests/fixtures/
+├── mock_eicu/
+│   ├── patient.csv.gz
+│   ├── vitalPeriodic.csv.gz
+│   ├── vitalAperiodic.csv.gz
+│   ├── lab.csv.gz
+│   └── medication.csv.gz
+└── test_video.mp4
+```
+
+### 4. Executar a fusão
 
 Com os dados mockados:
 
@@ -585,7 +606,15 @@ python main.py --video sessao.mp4 \
   --silencioso
 ```
 
-### 4. Saída
+### 5. Rodar os testes
+
+```bash
+pytest tests/ -v
+```
+
+> Os testes unitários não dependem das fixtures binárias. O teste E2E (`tests/test_e2e_mock.py`) gera as fixtures automaticamente na primeira execução, mas você pode gerá-las manualmente antes com `python tests/fixtures/generate_fixtures.py`.
+
+### 6. Saída
 
 O relatório final é salvo em:
 

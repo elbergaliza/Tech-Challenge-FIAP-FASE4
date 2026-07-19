@@ -124,6 +124,7 @@ class ClinicalAdapter(ModuleAdapter):
         Args:
             **kwargs: ignorado — parâmetros relevantes são passados no __init__.
         """
+        print(f"[clinical] data_dir={self.data_dir}, patient_id={self.patient_id}")
         self._validar_dados()
 
         config.DATA_RAW_DIR = self.data_dir
@@ -146,20 +147,26 @@ class ClinicalAdapter(ModuleAdapter):
 
         loader = EICUDataLoader()
         vital_df = loader.load_vital_periodic()
+        print(f"[clinical] vitalPeriodic carregado: {vital_df.shape[0]} linhas, {vital_df.shape[1]} colunas")
 
         builder = ClinicalFeatureBuilder()
         features = builder.build_vital_features(vital_df)
+        print(f"[clinical] features criadas: {features.shape[0]} pacientes, {features.shape[1]} colunas")
 
         train_features, predict_features = self._get_train_predict_features(
             features, self.patient_id
         )
+        modo = "leave-one-out" if self._use_leave_one_out() and self.patient_id else "batch"
+        print(f"[clinical] modo={modo}, train={len(train_features)}, predict={len(predict_features)}")
 
         detector = ClinicalAnomalyDetector()
         detector.train(train_features)
         predictions = detector.predict(predict_features)
+        print(f"[clinical] predicoes: {len(predictions)} linhas, anomalias={predictions['is_anomaly'].sum()}")
 
         alert_generator = AlertGenerator()
         alerts_df = alert_generator.generate_alerts(predictions, predict_features)
         alerts_df = self._filtrar_alertas(alerts_df, self.patient_id)
+        print(f"[clinical] alertas gerados: {len(alerts_df)}")
 
         return self._normalizar_alertas(alerts_df)

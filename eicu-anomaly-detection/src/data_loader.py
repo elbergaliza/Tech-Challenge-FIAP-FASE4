@@ -1,5 +1,5 @@
 import pandas as pd
-from src import config
+from . import config
 
 
 class EICUDataLoader:

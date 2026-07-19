@@ -13,7 +13,7 @@ produzir score 0..1 + nivel na MESMA escala (ver config.FAIXAS_RISCO).
 
 from __future__ import annotations
 
-from config import PESOS_ANOMALIA, FAIXAS_RISCO
+from .config import FAIXAS_RISCO, PESOS_ANOMALIA
 
 
 def calcular_score(anomalias: list[dict]) -> float:

@@ -224,6 +224,7 @@ __pycache__/
 *.pyd
 .Python
 .venv/
+.venv312/
 venv/
 env/
 
@@ -240,6 +241,15 @@ Thumbs.db
 **/data/processed/*
 **/models/*
 **/outputs/*
+tests/fixtures/mock_eicu/
+tests/fixtures/test_video.mp4
+tests/fixtures/final_multimodal_report_e2e.json
+
+# Modelos baixados automaticamente
+*.pt
+*.pth
+*.onnx
+*.tflite
 
 # Mantém estrutura de pastas
 !**/data/raw/.gitkeep

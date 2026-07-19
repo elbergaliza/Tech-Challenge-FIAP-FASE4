@@ -26,7 +26,7 @@ import platform
 import cv2
 import mediapipe as mp
 
-from config import LANDMARKS
+from .config import LANDMARKS
 
 mp_pose = mp.solutions.pose
 mp_draw = mp.solutions.drawing_utils

@@ -29,8 +29,8 @@ from __future__ import annotations
 import argparse
 import json
 
-import config
-from src.pipeline import extrair_metricas_video, alerta_de_metricas
+from modulo_video import config
+from modulo_video.pipeline import alerta_de_metricas, extrair_metricas_video
 
 
 def _resumo(alerta: dict) -> str:

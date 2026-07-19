@@ -1,0 +1,62 @@
+name: Fusion Multimodal CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            requirements.txt
+
+      - name: Install PyTorch (CPU-only)
+        run: |
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install project dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Generate mock fixtures
+        run: |
+          python tests/fixtures/generate_fixtures.py
+
+      - name: Run unit tests
+        run: pytest tests/ -v
+
+      - name: Run end-to-end pipeline with mock data
+        run: |
+          python main.py \
+            --video tests/fixtures/test_video.mp4 \
+            --eicu-data tests/fixtures/mock_eicu \
+            --video-patient-id ci_test \
+            --sem-objetos \
+            --silencioso
+
+      - name: Validate final report JSON
+        run: |
+          python -c "
+          import json
+          with open('outputs/final_multimodal_report.json', 'r', encoding='utf-8') as f:
+              report = json.load(f)
+          assert 'resumo' in report, 'Missing resumo'
+          assert 'alertas' in report, 'Missing alertas'
+          assert report['resumo']['total_alertas'] >= 0
+          assert isinstance(report['alertas'], list)
+          print('CI validation passed:', report['resumo']['total_alertas'], 'alertas')
+          "

@@ -28,7 +28,7 @@ from __future__ import annotations
 import argparse
 import csv
 
-from config import LIMIARES
+from modulo_video.config import LIMIARES
 
 # Metricas "de teto": anomalia quando o valor PASSA do limiar.
 METRICAS_TETO = ["inclinacao_tronco_graus", "assimetria_marcha", "instabilidade_lateral"]

@@ -297,28 +297,48 @@ def _generate_medication_csv(n_patients: int, rng: np.random.Generator) -> pd.Da
 
 
 def _generate_video() -> None:
-    """Gera um MP4 curto (10s, 320x240, 10fps) com uma pessoa se movendo."""
+    """Gera um MP4 curto (10s, 320x240, 10fps) com uma pessoa se movendo.
+
+    Usa OpenCV (já dependência do projeto) em vez de ffmpeg, para que o
+    gerador funcione em ambientes sem ffmpeg instalado, como runners de CI.
+    """
+    import cv2
+    import numpy as np
+
     FIXTURES_DIR.mkdir(parents=True, exist_ok=True)
 
     width, height, fps, duration = 320, 240, 10, 10
+    total_frames = fps * duration
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = cv2.VideoWriter(str(VIDEO_PATH), fourcc, float(fps), (width, height))
 
-    cmd = [
-        "ffmpeg",
-        "-y",
-        "-f", "lavfi",
-        "-i", f"color=c=black:s={width}x{height}:r={fps}",
-        "-vf",
-        (
-            f"drawbox=x='mod(t*{width/duration},{width})':y={height//2}:"
-            f"w=40:h=80:color=white:t=fill,"
-            f"drawtext=text='Person moving':x=10:y=10:fontcolor=white:fontsize=20"
-        ),
-        "-pix_fmt", "yuv420p",
-        "-t", str(duration),
-        str(VIDEO_PATH),
-    ]
+    if not out.isOpened():
+        raise RuntimeError(f"Não foi possível abrir VideoWriter para {VIDEO_PATH}")
 
-    subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    for frame_idx in range(total_frames):
+        t = frame_idx / fps
+        frame = np.zeros((height, width, 3), dtype=np.uint8)
+
+        # Retângulo branco simulando uma pessoa se movendo da esquerda para a direita.
+        box_w, box_h = 40, 80
+        x = int((t / duration) * (width - box_w)) % (width - box_w)
+        y = (height - box_h) // 2
+        cv2.rectangle(frame, (x, y), (x + box_w, y + box_h), (255, 255, 255), -1)
+
+        # Texto informativo.
+        cv2.putText(
+            frame,
+            "Person moving",
+            (10, 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (255, 255, 255),
+            2,
+        )
+
+        out.write(frame)
+
+    out.release()
 
 
 def _build_parser() -> argparse.ArgumentParser:

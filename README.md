@@ -28,17 +28,6 @@ A forma recomendada de executar o projeto é pelo notebook `notebooks/TechChalle
    4. **Fusão multimodal**: executa `main.py` usando os dados reais do eICU e o vídeo selecionado.
    5. **Relatório final**: exibe o JSON `outputs/final_multimodal_report.json` com os alertas unificados.
 
-## Testar uma branch específica
-
-Para testar alterações em desenvolvimento, defina a branch antes da primeira célula:
-
-```python
-import os
-os.environ['NOTEBOOK_BRANCH'] = 'feat/fusao-multimodal'
-```
-
-O valor padrão é `main`.
-
 > Atenção: o download do eICU Demo pode demorar alguns minutos. Os arquivos são públicos e não exigem login.
 
 ---
@@ -46,8 +35,6 @@ O valor padrão é `main`.
 # Execução local (fluxo completo)
 
 Use a execução local para testes rápidos, validação do CI ou quando já tiver o ambiente configurado. Todos os comandos abaixo devem ser executados a partir da raiz do repositório.
-
-> **Recomendamos o notebook do Google Colab** para executar todo o fluxo com dados reais do eICU Demo sem precisar configurar o ambiente. Veja a seção [Execução no Google Colab](#execução-no-google-colab) acima.
 
 ## 1. Criar e ativar o ambiente virtual
 

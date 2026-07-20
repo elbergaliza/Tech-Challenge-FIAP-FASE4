@@ -13,7 +13,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from adapters.base import ModuleAdapter
+from fusion.adapters.base import ModuleAdapter
 from fusion.core.schema import AlertaNormalizado, classificar_nivel, recomendacao_por_nivel
 
 
@@ -32,7 +32,13 @@ class MultimodalFusion:
         """Executa todos os adapters registrados e concatena alertas."""
         alertas: list[AlertaNormalizado] = []
         for adapter in self.adapters:
-            alertas.extend(adapter.run(**kwargs))
+            print(f"[fusion] Executando adapter: {adapter.__class__.__name__}")
+            alertas_adapter = adapter.run(**kwargs)
+            print(f"[fusion]   -> {len(alertas_adapter)} alerta(s) gerado(s)")
+            for a in alertas_adapter:
+                print(f"[fusion]      module_id={a.module_id} modulo={a.modulo} score={a.score_risco}")
+            alertas.extend(alertas_adapter)
+        print(f"[fusion] Total de alertas antes da fusao: {len(alertas)}")
         return alertas
 
     def fuse(self, alertas: list[AlertaNormalizado]) -> dict[str, Any]:

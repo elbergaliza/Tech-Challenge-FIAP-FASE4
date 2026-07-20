@@ -9,10 +9,9 @@ description = "Tech Challenge FIAP Fase 4 — monitoramento multimodal preventiv
 requires-python = ">=3.12"
 
 [tool.setuptools]
-packages = ["eicu_anomaly_detection", "modulo_video", "adapters", "fusion"]
+packages = ["eicu_anomaly_detection", "modulo_video", "fusion"]
 
 [tool.setuptools.package-dir]
 eicu_anomaly_detection = "eicu-anomaly-detection/src"
 modulo_video = "modulo_video/src"
-adapters = "adapters"
 fusion = "fusion"

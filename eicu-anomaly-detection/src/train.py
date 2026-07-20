@@ -26,6 +26,7 @@ def main():
     print(f"Features salvas em: {features_path}")
 
     print("Treinando modelo de detecção de anomalias...")
+    config.MODELS_DIR.mkdir(parents=True, exist_ok=True)
     detector = ClinicalAnomalyDetector()
     detector.train(features)
     detector.save()

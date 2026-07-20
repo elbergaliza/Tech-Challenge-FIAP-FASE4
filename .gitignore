@@ -243,6 +243,7 @@ Thumbs.db
 **/outputs/*
 tests/fixtures/mock_eicu/
 tests/fixtures/test_video.mp4
+modulo_video/data/exemplos/*.mp4
 tests/fixtures/final_multimodal_report_e2e.json
 
 # Modelos baixados automaticamente

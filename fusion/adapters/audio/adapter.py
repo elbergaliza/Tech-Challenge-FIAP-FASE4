@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from adapters.base import ModuleAdapter
+from fusion.adapters.base import ModuleAdapter
 from fusion.core.schema import AlertaNormalizado
 
 

@@ -2,9 +2,9 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 
-DATA_RAW_DIR = BASE_DIR / "data" / "raw"
+DATA_RAW_DIR = BASE_DIR / "modulo_anomalias" / "data" / "raw"
 DATA_PROCESSED_DIR = BASE_DIR / "data" / "processed"
-MODELS_DIR = BASE_DIR / "models"
+MODELS_DIR = BASE_DIR / "modulo_anomalias" / "models"
 OUTPUTS_DIR = BASE_DIR / "outputs"
 
 PATIENT_FILE = DATA_RAW_DIR / "patient.csv.gz"

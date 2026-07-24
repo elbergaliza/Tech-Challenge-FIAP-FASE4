@@ -30,6 +30,12 @@ import json
 import sys
 from pathlib import Path
 
+# Garante que os pacotes na raiz do repositório sejam encontrados,
+# mesmo quando main.py é executado de outro diretório (ex.: no Colab).
+REPO_ROOT = Path(__file__).resolve().parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from fusion.adapters.audio.adapter import AudioAdapter
 from fusion.adapters.clinical.adapter import ClinicalAdapter
 from fusion.adapters.video.adapter import VideoAdapter

@@ -7,11 +7,23 @@ name = "tech-challenge-fase4"
 version = "0.1.0"
 description = "Tech Challenge FIAP Fase 4 — monitoramento multimodal preventivo"
 requires-python = ">=3.12"
+dependencies = [
+    "azure-ai-textanalytics>=5.4.0",
+    "azure-cognitiveservices-speech>=1.51.0",
+    "huggingface-hub>=1.24.0",
+    "librosa>=0.11.0",
+    "moviepy>=2.2.1",
+    "numpy>=1.26.0,<2.0.0",
+    "opencv-python>=4.10.0,<5.0.0",
+    "pandas>=2.2.0",
+    "pydantic>=2.13.4",
+    "pydub>=0.25.1",
+    "scikit-learn>=1.5.0",
+    "typer>=0.27.0",
+]
 
 [tool.setuptools]
-packages = ["eicu_anomaly_detection", "modulo_video", "fusion"]
+packages = ["audio", "eicu_anomaly_detection", "modulo_video", "fusion"]
 
-[tool.setuptools.package-dir]
-eicu_anomaly_detection = "eicu-anomaly-detection/src"
-modulo_video = "modulo_video/src"
-fusion = "fusion"
+[tool.pytest.ini_options]
+testpaths = ["tests"]

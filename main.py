@@ -30,6 +30,12 @@ import json
 import sys
 from pathlib import Path
 
+# Garante que os pacotes na raiz do repositório sejam encontrados,
+# mesmo quando main.py é executado de outro diretório (ex.: no Colab).
+REPO_ROOT = Path(__file__).resolve().parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from fusion.adapters.audio.adapter import AudioAdapter
 from fusion.adapters.clinical.adapter import ClinicalAdapter
 from fusion.adapters.video.adapter import VideoAdapter
@@ -59,7 +65,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--audio",
         default=None,
-        help="Caminho do áudio para o módulo de áudio/texto (placeholder)",
+        help="Caminho do áudio para o módulo de áudio/texto",
+    )
+    parser.add_argument(
+        "--audio-language",
+        default="pt-BR",
+        choices=["pt-BR", "en-US", "en-GB"],
+        help="Idioma do áudio para transcrição (default: pt-BR)",
     )
     parser.add_argument(
         "--eicu-data",
@@ -136,10 +148,13 @@ def main(argv: list[str] | None = None) -> int:
         )
     )
     if args.audio:
+        audio_path = Path(args.audio)
+        audio_patient_id = audio_path.stem
         fusion.register(
             AudioAdapter(
                 audio_path=args.audio,
-                patient_id=args.video_patient_id,
+                patient_id=audio_patient_id,
+                language=args.audio_language,
             )
         )
 

@@ -18,8 +18,8 @@ Exemplos de uso:
 import argparse
 import json
 
-from modulo_video.pipeline import processar_video
-from modulo_video.report import salvar_json, salvar_csv
+from src.pipeline import processar_video
+from src.report import salvar_json, salvar_csv
 
 
 def main() -> None:

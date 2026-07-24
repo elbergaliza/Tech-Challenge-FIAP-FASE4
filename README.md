@@ -22,7 +22,7 @@ A forma recomendada de executar o projeto é pelo notebook `notebooks/TechChalle
    - Abra a partir da URL pública do repositório.
 
 2. **Execute as células em ordem**
-   1. **Clone e instalação**: faz `git clone`, instala as dependências e registra os pacotes editáveis com `pip install -e .`.
+   1. **Clone e instalação**: faz `git clone`, instala as dependências e deixa os pacotes internos prontos para importação a partir da raiz do repositório.
    2. **Dados reais do eICU Demo**: baixa automaticamente os arquivos `vitalPeriodic.csv.gz`, `lab.csv.gz` e `medication.csv.gz` do eICU Demo (PhysioNet).
    3. **Vídeo**: gera um vídeo de teste com OpenCV. Opcionalmente, você pode fazer upload de um vídeo próprio para `modulo_video/data/exemplos/` e ajustar o caminho na célula.
    4. **Fusão multimodal**: executa `main.py` usando os dados reais do eICU e o vídeo selecionado.
@@ -43,14 +43,13 @@ python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 ```
 
-## 2. Instalar as dependências e registrar os pacotes internos
+## 2. Instalar as dependências
 
 ```bash
 pip install -r requirements.txt
-pip install -e .
 ```
 
-> O projeto foi validado com Python 3.12. O `requirements.txt` unificado cobre o módulo clínico, o módulo de vídeo e os testes. O `pip install -e .` registra os pacotes internos (`eicu_anomaly_detection`, `modulo_video`, `fusion`) como editáveis.
+> O projeto foi validado com Python 3.12. O `requirements.txt` unificado cobre o módulo clínico, o módulo de vídeo, o módulo de áudio e os testes. Os pacotes internos (`eicu_anomaly_detection`, `modulo_video`, `audio`, `fusion`) são importados diretamente a partir da raiz do repositório, sem necessidade de `pip install -e .`.
 
 ## 3. Obter os dados
 
@@ -156,21 +155,22 @@ pytest tests/ -v
 
 Cada módulo pode ser executado de forma isolada, sem passar pela fusão multimodal.
 
-## Módulo clínico (`eicu-anomaly-detection`)
+## Módulo clínico (`eicu_anomaly_detection`)
 
 ### Estrutura
 
 ```text
-eicu-anomaly-detection/
-├── src/                          # Pacote Python eicu_anomaly_detection
-│   ├── __init__.py
-│   ├── config.py
-│   ├── data_loader.py
-│   ├── feature_builder.py
-│   ├── anomaly_detector.py
-│   ├── alert_generator.py
-│   ├── train.py
-│   └── test_output.py
+eicu_anomaly_detection/           # Pacote Python (na raiz do repositório)
+├── __init__.py
+├── config.py
+├── data_loader.py
+├── feature_builder.py
+├── anomaly_detector.py
+├── alert_generator.py
+├── train.py
+└── test_output.py
+
+eicu-anomaly-detection/           # Dados, modelos e outputs do módulo
 └── modulo_anomalias/
     ├── data/
     │   ├── raw/                  # Colocar os CSVs do eICU aqui
@@ -256,6 +256,29 @@ alerta = processar_video(
 print(alerta)
 ```
 
+## Módulo de áudio (`audio`)
+
+### Executar o processamento de um áudio
+
+```bash
+python -m audio.audio_cli process --audio-path tests/fixtures/test_audio.wav --patient-id local_audio --language pt-BR
+```
+
+Ou, via Python:
+
+```python
+from audio.audio_pipeline import process_audio_recording
+from audio.audio_schemas import AudioProcessingRequest
+
+request = AudioProcessingRequest(
+    patient_id="local_audio",
+    audio_path="tests/fixtures/test_audio.wav",
+    language="pt-BR",
+)
+alert = process_audio_recording(request)
+print(alert)
+```
+
 ---
 
 # Fusão Multimodal
@@ -267,19 +290,15 @@ adapters de cada módulo e consolida os alertas em um único relatório JSON.
 
 ```text
 Tech-Challenge-FIAP-FASE4/
-├── eicu-anomaly-detection/       # Módulo clínico (eICU)
-│   ├── src/                      # Pacote Python eicu_anomaly_detection
-│   └── modulo_anomalias/         # Dados, modelos e outputs do módulo
-│
-├── modulo_video/                 # Módulo de vídeo/fisioterapia
-│   └── src/                      # Pacote Python modulo_video
-│
+├── eicu_anomaly_detection/       # Pacote Python do módulo clínico (eICU)
+├── modulo_video/                 # Pacote Python do módulo de vídeo/fisioterapia
+├── audio/                        # Pacote Python do módulo de áudio/texto
 ├── fusion/                       # Motor de fusão multimodal
 │   ├── adapters/                 # Adaptadores para os módulos externos
 │   │   ├── base.py
 │   │   ├── clinical/             # Adapter do módulo eICU
 │   │   ├── video/                # Adapter do módulo de vídeo
-│   │   └── audio/                # Adapter stub (futuro módulo de áudio)
+│   │   └── audio/                # Adapter do módulo de áudio
 │   ├── core/
 │   │   ├── fusion.py
 │   │   └── schema.py
@@ -336,15 +355,11 @@ Exemplo de resumo:
 * `nivel_mais_critico` = nível do alerta com maior `score_risco`.
 * `recomendacao_geral` = baseada no `nivel_mais_critico`.
 
-### Extensibilidade
+### Módulo de áudio ativado
 
-Adicionar o módulo de áudio (branch `001-audio-texto-pipeline`) exige apenas:
+O módulo de áudio já está integrado à fusão multimodal. Para usá-lo, passe `--audio <caminho>` e, opcionalmente, `--audio-language <pt-BR|en-US|en-GB>` no `main.py`.
 
-1. Implementar `AudioAdapter.run()` em `fusion/adapters/audio/adapter.py`.
-2. Adicionar `--audio` no `main.py`.
-3. Registrar `AudioAdapter` no `MultimodalFusion`.
-
-Nenhuma mudança é necessária no motor de fusão em `fusion/core/fusion.py`.
+Sem credenciais Azure, o pipeline usa fallback acústico (features de áudio sem transcrição).
 
 ## Integração futura
 

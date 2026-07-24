@@ -12,7 +12,7 @@ from azure.ai.textanalytics import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
 from dotenv import load_dotenv
 
-from src.audio.audio_schemas import (
+from audio.audio_schemas import (
     AudioPipelineError,
     ErrorCode,
     SentimentLabel,
@@ -20,7 +20,7 @@ from src.audio.audio_schemas import (
     TranscriptionResult,
     TranscriptionStatus,
 )
-from src.audio.audio_scoring import clamp01, find_critical_terms, score_textual_from_findings
+from audio.audio_scoring import clamp01, find_critical_terms, score_textual_from_findings
 
 LOGGER = logging.getLogger(__name__)
 

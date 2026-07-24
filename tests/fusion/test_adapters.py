@@ -220,7 +220,7 @@ def test_audio_adapter_normaliza_alerta(tmp_path):
 
     adapter = AudioAdapter(audio_path=str(tmp_path / "fake.wav"), patient_id="paciente_audio_01")
 
-    from src.audio.audio_schemas import AudioAlert, RiskLevel
+    from audio.audio_schemas import AudioAlert, RiskLevel
 
     alerta = AudioAlert(
         patient_id="paciente_audio_01",

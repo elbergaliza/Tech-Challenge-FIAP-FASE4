@@ -45,7 +45,7 @@ import csv
 import json
 import os
 
-from src.config import LIMIARES
+from modulo_video.config import LIMIARES
 
 # Obs.: os imports pesados (cv2/mediapipe via src.pose_extractor) sao feitos
 # preguicosamente dentro de processar(), apos o modo --listar. Assim o dry-run
@@ -199,8 +199,8 @@ def processar(anotacoes: list[dict], indice: list[tuple[str, str]], camera: str,
               pular_frames: int, max_videos: int) -> list[dict]:
     """Extrai pose por gravacao e mede as metricas por repeticao (janela de frames)."""
     # Imports pesados so aqui: quem chega neste ponto vai de fato processar.
-    from src.pose_extractor import extrair_pose
-    from src.biomechanics import extrair_metricas
+    from modulo_video.pose_extractor import extrair_pose
+    from modulo_video.biomechanics import extrair_metricas
 
     por_video: dict[str, list[dict]] = {}
     for a in anotacoes:

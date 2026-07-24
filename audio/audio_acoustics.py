@@ -9,8 +9,8 @@ import librosa
 import numpy as np
 from pydub import AudioSegment, silence
 
-from src.audio.audio_schemas import AcousticFeatures, AcousticIndicator
-from src.audio.audio_scoring import clamp01
+from audio.audio_schemas import AcousticFeatures, AcousticIndicator
+from audio.audio_scoring import clamp01
 
 
 def _load_audiosegment(audio_path: Path) -> AudioSegment:

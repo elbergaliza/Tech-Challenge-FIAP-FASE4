@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from src.audio.audio_schemas import (
+from audio.audio_schemas import (
     AcousticFeatures,
     AudioAlert,
     AudioEvidences,

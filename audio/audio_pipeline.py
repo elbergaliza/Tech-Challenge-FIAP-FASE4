@@ -11,9 +11,9 @@ from moviepy import VideoFileClip
 from pydub import AudioSegment
 from pydub.exceptions import CouldntDecodeError
 
-from src.audio.audio_acoustics import analyze_acoustic_features
-from src.audio.audio_azure import analyze_text_findings, transcribe_audio
-from src.audio.audio_schemas import (
+from audio.audio_acoustics import analyze_acoustic_features
+from audio.audio_azure import analyze_text_findings, transcribe_audio
+from audio.audio_schemas import (
     AudioAlert,
     AudioMetadata,
     AudioPipelineError,
@@ -23,8 +23,8 @@ from src.audio.audio_schemas import (
     TextFindings,
     TranscriptionResult,
 )
-from src.audio.audio_scoring import apply_textual_effective_score, build_audio_alert
-from src.audio.audio_storage import save_processed, save_report, save_transcription
+from audio.audio_scoring import apply_textual_effective_score, build_audio_alert
+from audio.audio_storage import save_processed, save_report, save_transcription
 
 LOGGER = logging.getLogger(__name__)
 

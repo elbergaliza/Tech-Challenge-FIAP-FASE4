@@ -7,8 +7,8 @@ from pathlib import Path
 import typer
 from dotenv import load_dotenv
 
-from src.audio.audio_pipeline import process_audio_recording
-from src.audio.audio_schemas import AudioPipelineError, AudioProcessingRequest
+from audio.audio_pipeline import process_audio_recording
+from audio.audio_schemas import AudioPipelineError, AudioProcessingRequest
 
 app = typer.Typer(help="Pipeline de audio para gerar alerta padronizado.")
 

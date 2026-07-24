@@ -12,8 +12,8 @@ from typing import Any
 
 from fusion.adapters.base import ModuleAdapter
 from fusion.core.schema import AlertaNormalizado, classificar_nivel
-from src.audio.audio_pipeline import process_audio_recording
-from src.audio.audio_schemas import AudioAlert, AudioProcessingRequest, AudioSource
+from audio.audio_pipeline import process_audio_recording
+from audio.audio_schemas import AudioAlert, AudioProcessingRequest, AudioSource
 
 
 class AudioAdapter(ModuleAdapter):

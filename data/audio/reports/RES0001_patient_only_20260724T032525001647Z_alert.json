@@ -1,0 +1,22 @@
+{
+  "patient_id": "RES0001_patient_only",
+  "modulo": "audio_texto",
+  "tipo_anomalia": "alteracao_respiratoria_vocal",
+  "score_risco": 0.4078755,
+  "nivel_risco": "moderado",
+  "descricao": "Risco moderado definido principalmente por termos/sentimento do texto transcrito.",
+  "recomendacao": "Reavaliar paciente e manter monitoramento clinico.",
+  "evidencias": {
+    "score_acustico": 0.3,
+    "score_textual": 0.5,
+    "score_textual_efetivo": 0.4078755,
+    "confianca_transcricao": 0.815751,
+    "fontes_risco": [
+      "acustico",
+      "texto"
+    ],
+    "status_transcricao": "success",
+    "duracao_processamento_ms": 14143.373945000349,
+    "excedeu_limite_latencia": false
+  }
+}

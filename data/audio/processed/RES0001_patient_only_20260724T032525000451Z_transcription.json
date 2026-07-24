@@ -1,0 +1,11 @@
+{
+  "patient_id": "RES0001_patient_only",
+  "transcription": {
+    "text": "And so I've just had this pain in my chest for just over a week now and it's caused me to have trouble breathing. 52 yeah, just about that. I I think maybe 8 days ago it it is, but.",
+    "confidence": 0.815751,
+    "language": "en-US",
+    "provider": "azure_speech_to_text",
+    "status": "success"
+  },
+  "saved_at": "20260724T032525000414Z"
+}

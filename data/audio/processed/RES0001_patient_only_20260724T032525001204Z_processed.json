@@ -1,0 +1,36 @@
+{
+  "metadata": {
+    "duration_seconds": 304.723,
+    "size_mb": 9.299449920654297,
+    "format": "wav",
+    "sample_rate_hz": 16000,
+    "channels": 1
+  },
+  "transcription": {
+    "text": "And so I've just had this pain in my chest for just over a week now and it's caused me to have trouble breathing. 52 yeah, just about that. I I think maybe 8 days ago it it is, but.",
+    "confidence": 0.815751,
+    "language": "en-US",
+    "provider": "azure_speech_to_text",
+    "status": "success"
+  },
+  "text_findings": {
+    "critical_terms": [
+      "trouble breathing"
+    ],
+    "sentiment": "negative",
+    "sentiment_confidence": 0.99,
+    "score_textual": 0.5,
+    "score_textual_efetivo": 0.4078755
+  },
+  "acoustic_features": {
+    "rms": 0.06523442268371582,
+    "peak_amplitude": 0.8542435987426374,
+    "silence_ratio": 0.22676660442434604,
+    "long_pause_count": 0,
+    "cough_or_breathing_indicator": "possible",
+    "score_acustico": 0.3,
+    "signals": [
+      "possible_breathing_pattern"
+    ]
+  }
+}

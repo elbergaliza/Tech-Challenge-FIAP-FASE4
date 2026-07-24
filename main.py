@@ -148,10 +148,12 @@ def main(argv: list[str] | None = None) -> int:
         )
     )
     if args.audio:
+        audio_path = Path(args.audio)
+        audio_patient_id = audio_path.stem
         fusion.register(
             AudioAdapter(
                 audio_path=args.audio,
-                patient_id=args.video_patient_id,
+                patient_id=audio_patient_id,
                 language=args.audio_language,
             )
         )

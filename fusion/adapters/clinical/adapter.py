@@ -1,5 +1,5 @@
 """
-Adapter para o módulo clínico (eicu-anomaly-detection).
+Adapter para o módulo clínico (`eicu_anomaly_detection`).
 
 Executa o pipeline clínico em lote (carregamento de dados, criação de
 features, treinamento, predição e geração de alertas) e normaliza os alertas
@@ -25,9 +25,9 @@ from fusion.core.schema import AlertaNormalizado, classificar_nivel
 
 
 class ClinicalAdapter(ModuleAdapter):
-    """Adapter para o módulo ``eicu-anomaly-detection``."""
+    """Adapter para o módulo ``eicu_anomaly_detection``."""
 
-    DEFAULT_DATA_DIR = Path(__file__).resolve().parents[2] / "eicu-anomaly-detection" / "modulo_anomalias" / "data" / "raw"
+    DEFAULT_DATA_DIR = Path(__file__).resolve().parents[2] / "eicu_anomaly_detection" / "data" / "raw"
 
     def __init__(
         self,
@@ -133,15 +133,13 @@ class ClinicalAdapter(ModuleAdapter):
         config.MEDICATION_FILE = self.data_dir / "medication.csv.gz"
         config.DATA_PROCESSED_DIR = (
             Path(__file__).resolve().parents[2]
-            / "eicu-anomaly-detection"
-            / "modulo_anomalias"
+            / "eicu_anomaly_detection"
             / "data"
             / "processed"
         )
         config.OUTPUTS_DIR = (
             Path(__file__).resolve().parents[2]
-            / "eicu-anomaly-detection"
-            / "modulo_anomalias"
+            / "eicu_anomaly_detection"
             / "outputs"
         )
 

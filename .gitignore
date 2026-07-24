@@ -258,3 +258,4 @@ tests/fixtures/final_multimodal_report_e2e.json
 !**/data/processed/.gitkeep
 !**/models/.gitkeep
 !**/outputs/.gitkeep
+eicu_anomaly_detection/data/raw_real/

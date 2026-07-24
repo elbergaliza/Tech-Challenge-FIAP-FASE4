@@ -15,7 +15,7 @@
 # E rode a pipeline:
 #   python main.py --video tests/fixtures/test_video.mp4 --eicu-data tests/fixtures/mock_eicu --video-patient-id local_test --sem-objetos
 
-# Módulo clínico (eicu-anomaly-detection)
+# Módulo clínico (eicu_anomaly_detection)
 pandas>=2.2.0
 numpy>=1.26.0,<2.0.0
 scikit-learn>=1.5.0

@@ -82,7 +82,7 @@ Crie uma conta gratuita em https://physionet.org/, baixe os arquivos
 e coloque-os em:
 
 ```text
-eicu-anomaly-detection/modulo_anomalias/data/raw/
+eicu_anomaly_detection/data/raw/
 ```
 
 ## 4. Executar a fusão multimodal
@@ -155,29 +155,6 @@ pytest tests/ -v
 
 Cada módulo pode ser executado de forma isolada, sem passar pela fusão multimodal.
 
-## Módulo clínico (`eicu_anomaly_detection`)
-
-### Estrutura
-
-```text
-eicu_anomaly_detection/           # Pacote Python (na raiz do repositório)
-├── __init__.py
-├── config.py
-├── data_loader.py
-├── feature_builder.py
-├── anomaly_detector.py
-├── alert_generator.py
-├── train.py
-└── test_output.py
-
-eicu-anomaly-detection/           # Dados, modelos e outputs do módulo
-└── modulo_anomalias/
-    ├── data/
-    │   ├── raw/                  # Colocar os CSVs do eICU aqui
-    │   └── processed/
-    ├── models/
-    └── outputs/
-```
 
 ### Executar o pipeline completo
 
@@ -192,7 +169,7 @@ Esse comando executa o pipeline completo:
 3. treina o modelo Isolation Forest;
 4. gera predições, scores e níveis de risco;
 5. gera alertas;
-6. salva artefatos em `data/processed/`, `models/` e `outputs/`.
+6. salva artefatos em `eicu_anomaly_detection/data/processed/`, `eicu_anomaly_detection/models/` e `eicu_anomaly_detection/outputs/`.
 
 ### Testar componentes isoladamente
 
@@ -454,18 +431,20 @@ medication.csv.gz
 Coloque-os dentro de:
 
 ```text
-eicu-anomaly-detection/modulo_anomalias/data/raw/
+eicu_anomaly_detection/data/raw/
 ```
 
 A estrutura esperada é:
 
 ```text
-eicu-anomaly-detection/modulo_anomalias/
-└── data/
-    └── raw/
-        ├── vitalPeriodic.csv.gz
-        ├── lab.csv.gz
-        └── medication.csv.gz
+eicu_anomaly_detection/
+├── data/
+│   └── raw/
+│       ├── vitalPeriodic.csv.gz
+│       ├── lab.csv.gz
+│       └── medication.csv.gz
+├── models/
+└── outputs/
 ```
 
 ---

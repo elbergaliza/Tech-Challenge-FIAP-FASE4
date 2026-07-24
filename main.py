@@ -75,7 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--eicu-data",
-        default="eicu-anomaly-detection/modulo_anomalias/data/raw/",
+        default="eicu_anomaly_detection/data/raw/",
         help="Diretório com os arquivos CSV do eICU Demo",
     )
     parser.add_argument(

@@ -31,7 +31,7 @@ def main():
     detector.train(features)
     detector.save()
 
-    print("Modelo salvo em models/clinical_anomaly_detector.joblib")
+    print(f"Modelo salvo em {config.MODELS_DIR / 'clinical_anomaly_detector.joblib'}")
 
     print("Gerando predições...")
     predictions = detector.predict(features)

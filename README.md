@@ -241,7 +241,7 @@ print(alerts)
 ### Executar o processamento de um vídeo
 
 ```bash
-python -m modulo_video.pipeline tests/fixtures/test_video.mp4 --sem-objetos
+python -m modulo_video.main --video tests/fixtures/test_video.mp4 --sem-objetos
 ```
 
 Ou, via Python:
@@ -261,7 +261,7 @@ print(alerta)
 ### Executar o processamento de um áudio
 
 ```bash
-python -m audio.audio_cli process --audio-path tests/fixtures/test_audio.wav --patient-id local_audio --language pt-BR
+python -m audio.audio_cli --audio-path tests/fixtures/test_audio.wav --patient-id local_audio --language pt-BR
 ```
 
 Ou, via Python:

@@ -206,12 +206,37 @@ def test_video_adapter_arquivo_nao_encontrado(tmp_path):
         adapter._validar_video()
 
 
-def test_audio_adapter_stub_retorna_vazio():
+def test_audio_adapter_arquivo_nao_encontrado(tmp_path):
     from fusion.adapters.audio.adapter import AudioAdapter
 
-    adapter = AudioAdapter()
+    adapter = AudioAdapter(audio_path=str(tmp_path / "inexistente.wav"))
 
-    assert adapter.run() == []
+    with pytest.raises(FileNotFoundError):
+        adapter._validar_audio()
+
+
+def test_audio_adapter_normaliza_alerta(tmp_path):
+    from fusion.adapters.audio.adapter import AudioAdapter
+
+    adapter = AudioAdapter(audio_path=str(tmp_path / "fake.wav"), patient_id="paciente_audio_01")
+
+    from src.audio.audio_schemas import AudioAlert, RiskLevel
+
+    alerta = AudioAlert(
+        patient_id="paciente_audio_01",
+        tipo_anomalia="sinais_acusticos",
+        score_risco=0.55,
+        nivel_risco=RiskLevel.MODERADO,
+        descricao="Risco moderado por sinais acusticos.",
+        recomendacao="Reavaliar paciente.",
+    )
+
+    normalizado = adapter._normalizar_alerta(alerta)
+
+    assert normalizado.module_id == "paciente_audio_01"
+    assert normalizado.modulo == "audio_texto"
+    assert normalizado.score_risco == 0.55
+    assert normalizado.nivel_risco == "moderado"
 
 
 def test_clinical_adapter_run_usa_leave_one_out_quando_env_ativado(monkeypatch, tmp_path):

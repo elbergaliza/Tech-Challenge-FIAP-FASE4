@@ -59,7 +59,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--audio",
         default=None,
-        help="Caminho do áudio para o módulo de áudio/texto (placeholder)",
+        help="Caminho do áudio para o módulo de áudio/texto",
+    )
+    parser.add_argument(
+        "--audio-language",
+        default="pt-BR",
+        choices=["pt-BR", "en-US", "en-GB"],
+        help="Idioma do áudio para transcrição (default: pt-BR)",
     )
     parser.add_argument(
         "--eicu-data",
@@ -140,6 +146,7 @@ def main(argv: list[str] | None = None) -> int:
             AudioAdapter(
                 audio_path=args.audio,
                 patient_id=args.video_patient_id,
+                language=args.audio_language,
             )
         )
 
